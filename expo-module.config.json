@@ -1,9 +1,10 @@
 {
-  "platforms": ["apple", "android", "web"],
-  "apple": {
-    "modules": ["LibmpvVideoModule"]
-  },
+  "platforms": [
+    "android"
+  ],
   "android": {
-    "modules": ["com.libmpv.LibmpvVideoModule"]
+    "modules": [
+      "com.libmpv.LibmpvVideoModule"
+    ]
   }
 }
