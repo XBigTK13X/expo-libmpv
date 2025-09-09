@@ -1,19 +1,14 @@
-import type { StyleProp, ViewStyle } from 'react-native';
-
-export type OnLoadEventPayload = {
-  url: string;
-};
-
-export type LibmpvVideoModuleEvents = {
-  onChange: (params: ChangeEventPayload) => void;
-};
-
-export type ChangeEventPayload = {
-  value: string;
-};
-
 export type LibmpvVideoViewProps = {
-  url: string;
-  onLoad: (event: { nativeEvent: OnLoadEventPayload }) => void;
-  style?: StyleProp<ViewStyle>;
+  style: object,
+  playUrl: string,
+  isPlaying: boolean,
+  useHardwareDecoder: boolean,
+  surfaceStyle: object,
+  selectedAudioTrack: number,
+  selectedSubtitleTrack: number,
+  seekToSeconds: number,
+  surfaceWidth: number,
+  surfaceHeight: number,
+  onLibmpvEvent: (libmpvEvent: object) => void,
+  onLibmpvLog: (libmpvLog: object) => void,
 };

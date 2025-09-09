@@ -90,7 +90,7 @@ android {
     namespace 'com.libmpv.example'
     defaultConfig {
         applicationId 'com.libmpv.example'
-        minSdkVersion rootProject.ext.minSdkVersion
+        minSdkVersion 26
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"

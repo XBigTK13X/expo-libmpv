@@ -17,6 +17,11 @@ if (useManagedAndroidSdkVersions) {
   useDefaultAndroidSdkVersions()
 } else {
   buildscript {
+      repositories {
+      google()
+      mavenCentral()
+      maven { url "/home/kretst/maven-repo" }
+    }
     // Simple helper that allows the root project to override versions declared by this library.
     ext.safeExtGet = { prop, fallback ->
       rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
@@ -25,10 +30,14 @@ if (useManagedAndroidSdkVersions) {
   project.android {
     compileSdkVersion safeExtGet("compileSdkVersion", 34)
     defaultConfig {
-      minSdkVersion safeExtGet("minSdkVersion", 21)
+      minSdkVersion 26
       targetSdkVersion safeExtGet("targetSdkVersion", 34)
     }
   }
+}
+
+dependencies {
+  implementation "com.libmpv:android-libmpv:0.5.10"
 }
 
 android {
