@@ -36,7 +36,7 @@ const EVENT_LOOKUP: any = {
 const LibmpvVideoView: React.ComponentType<LibmpvVideoViewProps> =
   requireNativeView('LibmpvVideo');
 
-export const LibmpvVideo = React.forwardRef((props: LibmpvVideoViewProps, parentRef) => {
+export const LibmpvVideo = React.forwardRef((props: any, parentRef: any) => {
   const nativeRef = React.useRef<any>(null);
 
   // Pass mpv events and logs back up to the parent

@@ -4,7 +4,6 @@ export type LibmpvVideoViewProps = {
   playUrl: string,
   isPlaying: boolean,
   useHardwareDecoder: boolean,
-  surfaceStyle: any,
   selectedAudioTrack: number,
   selectedSubtitleTrack: number,
   seekToSeconds: number,
