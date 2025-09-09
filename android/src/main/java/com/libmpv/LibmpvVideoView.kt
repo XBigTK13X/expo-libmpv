@@ -3,27 +3,34 @@ package com.libmpv
 import android.content.Context
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import android.widget.FrameLayout
 import dev.jdtech.mpv.MPVLib
-import expo.modules.kotlin.events.EventDispatcher
-import expo.modules.kotlin.events.EventName
+import expo.modules.kotlin.AppContext
 import expo.modules.kotlin.views.ExpoView
-import expo.modules.kotlin.views.ViewManager
-import expo.modules.kotlin.views.Prop
+import expo.modules.kotlin.viewevent.EventDispatcher
 
-class LibmpvVideoView(context: Context) :
-  ExpoView(context),
-  SurfaceView(context),
+enum class LibmpvEvents(val eventName: String){
+  Log("onLog"),
+  Event("onEvent")
+}
+
+class LibmpvVideoView(context: Context, appContext: AppContext) :
+  ExpoView(context,appContext),
   SurfaceHolder.Callback,
   MPVLib.LogObserver,
   MPVLib.EventObserver {
 
   companion object {
-    const val HWDEC = "mediacodec-copy"
-    const val HWCODECS = "h264,hevc,mpeg4,mpeg2video,vp8,vp9,av1"
+    const val HARDWARE_OPTIONS = "mediacodec-copy"
+    const val ACCELERATED_CODECS = "h264,hevc,mpeg4,mpeg2video,vp8,vp9,av1"
   }
+
+  private val onLog by EventDispatcher()
+  private val onEvent by EventDispatcher()
 
   private var isSurfaceCreated: Boolean = false
   private val mpv: LibmpvWrapper = LibmpvWrapper(context)
+  private val surfaceView: SurfaceView = SurfaceView(context)
 
   private var playUrl: String? = null
   private var surfaceWidth: Int? = null
@@ -32,22 +39,25 @@ class LibmpvVideoView(context: Context) :
   private var subtitleIndex: Int? = null
   private var useHardwareDecoder: Boolean? = null
 
-  private val eventDispatcher = EventDispatcher()
-
   init {
-    holder.addCallback(this)
+    surfaceView.holder.addCallback(this)
+    val layoutParams = FrameLayout.LayoutParams(
+        FrameLayout.LayoutParams.MATCH_PARENT,
+        FrameLayout.LayoutParams.MATCH_PARENT
+    )
+    addView(surfaceView, layoutParams)
   }
 
   // Props from JS
-  @Prop fun setPlayUrl(url: String?) { playUrl = url }
-  @Prop fun setSurfaceWidth(width: Int?) { surfaceWidth = width }
-  @Prop fun setSurfaceHeight(height: Int?) { surfaceHeight = height }
-  @Prop fun setAudioIndex(index: Int?) { audioIndex = index }
-  @Prop fun setSubtitleIndex(index: Int?) { subtitleIndex = index }
-  @Prop fun setUseHardwareDecoder(useHw: Boolean?) { useHardwareDecoder = useHw }
+  fun setPlayUrl(url: String?) { playUrl = url }
+  fun setSurfaceWidth(width: Int?) { surfaceWidth = width }
+  fun setSurfaceHeight(height: Int?) { surfaceHeight = height }
+  fun setAudioIndex(index: Int?) { audioIndex = index }
+  fun setSubtitleIndex(index: Int?) { subtitleIndex = index }
+  fun setUseHardwareDecoder(useHw: Boolean?) { useHardwareDecoder = useHw }
 
   fun cleanup() {
-    holder.removeCallback(this)
+    surfaceView.holder.removeCallback(this)
     mpv.cleanup()
   }
 
@@ -65,8 +75,11 @@ class LibmpvVideoView(context: Context) :
     mpv.setOptionString("force-window", "no")
 
     mpv.setOptionString("config", "yes")
-    mpv.setOptionString("config-dir", mpv.getMpvDirectoryPath())
-    mpv.setOptionString("sub-font-dir", mpv.getMpvDirectoryPath())
+    val mpvDir = mpv.getMpvDirectoryPath()
+    mpvDir?.let{
+      mpv.setOptionString("config-dir", mpvDir)
+      mpv.setOptionString("sub-font-dir", mpvDir)
+    }
 
     mpv.setOptionString("keep-open", "always")
     mpv.setOptionString("save-position-on-quit", "no")
@@ -77,8 +90,8 @@ class LibmpvVideoView(context: Context) :
     mpv.setOptionString("vo", "gpu-next")
 
     if (useHardwareDecoder == true) {
-      mpv.setOptionString("hwdec", HWDEC)
-      mpv.setOptionString("hwdec-codecs", HWCODECS)
+      mpv.setOptionString("hwdec", HARDWARE_OPTIONS)
+      mpv.setOptionString("hwdec-codecs", ACCELERATED_CODECS)
     } else {
       mpv.setOptionString("hwdec", "no")
     }
@@ -102,7 +115,7 @@ class LibmpvVideoView(context: Context) :
   }
 
   private fun log(method: String, argument: String) {
-    eventDispatcher.dispatch(LibmpvEvents.Log, mapOf(
+    onLog(mapOf(
       "method" to method,
       "argument" to argument
     ))
@@ -113,7 +126,7 @@ class LibmpvVideoView(context: Context) :
     val height = surfaceHeight ?: 0
     holder.setFixedSize(width, height)
     mpv.setPropertyString("android-surface-size", "${width}x$height")
-    mpv.attachSurface(this)
+    mpv.attachSurface(surfaceView)
     prepareMpvPlayback()
     isSurfaceCreated = true
     log("LibmpvVideoView.surfaceCreated", "Surface created and MPV should be playing")
@@ -133,14 +146,15 @@ class LibmpvVideoView(context: Context) :
     } else {
       ",sid=${(subtitleIndex ?: 0) + 1}"
     }
-    mpv.play(playUrl, options)
+    val url: String = (playUrl as? String) ?: ""
+    mpv.play(url, options)
   }
 
   fun setHardwareDecoder(useHardware: Boolean) {
     useHardwareDecoder = useHardware
     if (useHardwareDecoder == true) {
-      mpv.setOptionString("hwdec", HWDEC)
-      mpv.setOptionString("hwdec-codecs", HWCODECS)
+      mpv.setOptionString("hwdec", HARDWARE_OPTIONS)
+      mpv.setOptionString("hwdec-codecs", ACCELERATED_CODECS)
     } else {
       mpv.setOptionString("hwdec", "no")
     }
@@ -156,7 +170,7 @@ class LibmpvVideoView(context: Context) :
 
   // MPVLib.LogObserver
   override fun logMessage(prefix: String, level: Int, text: String) {
-    eventDispatcher.dispatch(LibmpvEvents.Log, mapOf(
+    onLog(mapOf(
       "prefix" to prefix,
       "level" to "$level",
       "text" to text
@@ -165,14 +179,14 @@ class LibmpvVideoView(context: Context) :
 
   // MPVLib.EventObserver
   override fun eventProperty(property: String) {
-    eventDispatcher.dispatch(LibmpvEvents.Event, mapOf(
+    onEvent(mapOf(
       "property" to property,
       "kind" to "none"
     ))
   }
 
   override fun eventProperty(property: String, value: Long) {
-    eventDispatcher.dispatch(LibmpvEvents.Event, mapOf(
+    onEvent(mapOf(
       "property" to property,
       "kind" to "long",
       "value" to "$value"
@@ -180,7 +194,7 @@ class LibmpvVideoView(context: Context) :
   }
 
   override fun eventProperty(property: String, value: Double) {
-    eventDispatcher.dispatch(LibmpvEvents.Event, mapOf(
+    onEvent(mapOf(
       "property" to property,
       "kind" to "double",
       "value" to "$value"
@@ -188,7 +202,7 @@ class LibmpvVideoView(context: Context) :
   }
 
   override fun eventProperty(property: String, value: Boolean) {
-    eventDispatcher.dispatch(LibmpvEvents.Event, mapOf(
+    onEvent(mapOf(
       "property" to property,
       "kind" to "boolean",
       "value" to if (value) "true" else "false"
@@ -196,7 +210,7 @@ class LibmpvVideoView(context: Context) :
   }
 
   override fun eventProperty(property: String, value: String) {
-    eventDispatcher.dispatch(LibmpvEvents.Event, mapOf(
+    onEvent(mapOf(
       "property" to property,
       "kind" to "string",
       "value" to value
@@ -204,22 +218,9 @@ class LibmpvVideoView(context: Context) :
   }
 
   override fun event(eventId: Int) {
-    eventDispatcher.dispatch(LibmpvEvents.Event, mapOf(
+    onEvent(mapOf(
       "eventId" to "$eventId",
       "kind" to "eventId"
     ))
   }
-}
-
-// Define event names for Expo
-object LibmpvEvents {
-  val Log = EventName("onLibmpvLog")
-  val Event = EventName("onLibmpvEvent")
-}
-
-// View Manager that registers this view for Expo
-class LibmpvVideoViewManager : ViewManager<LibmpvVideoView>() {
-  override fun getName() = "LibmpvVideoView"
-
-  override fun createView(context: Context) = LibmpvVideoView(context)
 }

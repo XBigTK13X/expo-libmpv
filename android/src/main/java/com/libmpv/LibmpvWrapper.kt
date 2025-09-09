@@ -2,6 +2,7 @@ package com.libmpv
 
 import android.content.Context
 import android.util.Log
+import android.view.SurfaceView
 import dev.jdtech.mpv.MPVLib
 import java.io.File
 import java.io.FileOutputStream
@@ -22,7 +23,7 @@ class LibmpvWrapper(private val applicationContext: Context) {
     private var mpvDirectory: String? = null
     private var surfaceWidth: Int = -1
     private var surfaceHeight: Int = -1
-    private var surfaceView: LibmpvSurfaceView? = null
+    private var surfaceView: SurfaceView? = null
     private val mpv: MPVLib = MPVLib()
 
     fun create(): Boolean {
@@ -68,7 +69,8 @@ class LibmpvWrapper(private val applicationContext: Context) {
 
     private fun logException(exception: Exception) {
         try {
-            logObserver?.logMessage("RNLE", 20, exception.message)
+            val message: String = (exception.message as? String) ?: "Unable to read error message"
+            logObserver?.logMessage("RNLE", 20, message)
         } catch (e: Exception) {
             if (!swallow) throw e
         }
@@ -142,7 +144,7 @@ class LibmpvWrapper(private val applicationContext: Context) {
         }
     }
 
-    fun attachSurface(surfaceView: LibmpvSurfaceView) {
+    fun attachSurface(surfaceView: SurfaceView) {
         try {
             if (created) {
                 this.surfaceView = surfaceView
@@ -229,8 +231,8 @@ class LibmpvWrapper(private val applicationContext: Context) {
         }
         try {
             mpv.removeLogObservers()
-        } catch (_: Exception) {
-            if (!swallow) throw _
+        } catch (e: Exception) {
+            if (!swallow) throw e
         }
         try {
             mpv.destroy()
