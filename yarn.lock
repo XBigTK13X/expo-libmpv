@@ -3767,6 +3767,11 @@ expo-modules-core@2.5.0:
   dependencies:
     invariant "^2.2.4"
 
+expo-screen-orientation@^8.1.7:
+  version "8.1.7"
+  resolved "https://registry.yarnpkg.com/expo-screen-orientation/-/expo-screen-orientation-8.1.7.tgz#3751b441f2bfcbde798b1508c0ff9f099f4be911"
+  integrity sha512-nYwadYtdU6mMDk0MCHMPPPQtBoeFYJ2FspLRW+J35CMLqzE4nbpwGeiImfXzkvD94fpOCfI4KgLj5vGauC3pfA==
+
 expo@~53.0.0:
   version "53.0.22"
   resolved "https://registry.yarnpkg.com/expo/-/expo-53.0.22.tgz#ff61b6bcdf0855b7b88ca5ca0f622e12cbdb1d0f"

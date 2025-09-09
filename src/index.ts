@@ -1,2 +1,2 @@
-export { default as LibmpvVideoView } from './LibmpvVideoView';
+export { default as LibmpvVideo } from './LibmpvVideoView';
 export * from './LibmpvVideo.types';
