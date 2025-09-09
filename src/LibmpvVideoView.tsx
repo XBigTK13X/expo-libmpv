@@ -42,6 +42,9 @@ export const LibmpvVideo = React.forwardRef((props: LibmpvVideoViewProps, parent
   // Pass mpv events and logs back up to the parent
   const onLogEvent = (libmpvEvent: any) => {
     if (props.onLibmpvEvent) {
+      if (libmpvEvent && libmpvEvent.nativeEvent) {
+        libmpvEvent = libmpvEvent.nativeEvent
+      }
       if (libmpvEvent.eventId) {
         libmpvEvent.value = parseInt(libmpvEvent.eventId, 10)
         libmpvEvent.eventKind = EVENT_LOOKUP[libmpvEvent.eventId]
@@ -57,6 +60,9 @@ export const LibmpvVideo = React.forwardRef((props: LibmpvVideoViewProps, parent
   }
   const onLibmpvLog = (libmpvLog: any) => {
     if (props.onLibmpvLog) {
+      if (libmpvLog && libmpvLog.nativeEvent) {
+        libmpvLog = libmpvLog.nativeEvent
+      }
       return props.onLibmpvLog(libmpvLog);
     }
   }
@@ -94,7 +100,7 @@ export const LibmpvVideo = React.forwardRef((props: LibmpvVideoViewProps, parent
     selectedAudioTrack={props.selectedAudioTrack}
     selectedSubtitleTrack={props.selectedSubtitleTrack}
     seekToSeconds={props.seekToSeconds}
-    onLogEvent={onLogEvent}
+    onLibmpvEvent={onLogEvent}
     onLibmpvLog={onLibmpvLog}
   />
 })

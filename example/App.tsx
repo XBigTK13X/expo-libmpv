@@ -90,18 +90,12 @@ function VideoPage({ setPage }) {
   }
 
   function onLibmpvEvent(libmpvEvent) {
-    if (libmpvEvent.dispatchConfig) {
-      return
-    }
     if (!libmpvEvent.property || libmpvEvent.property !== 'track-list') {
       console.log(JSON.stringify({ libmpvEvent }, circularReplacer(), 4))
     }
   }
 
   function onLibmpvLog(libmpvLog) {
-    if (libmpvLog.dispatchConfig) {
-      return
-    }
     if (libmpvLog.hasOwnProperty('method')) {
       console.log("=-=-=-=-=-=-==- NATIVE METHOD =-=-=-=--==-=")
     }
