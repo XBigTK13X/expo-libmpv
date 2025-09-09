@@ -8,6 +8,9 @@
                         "minSdkVersion": 26
                     }
                 }
+            ],
+            [
+                "./expo-plugin-libmpvvideo"
             ]
         ]
     }
