@@ -1,6 +1,6 @@
 {
   "name": "expo-libmpv",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A libmpv native component for Android",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -28,8 +28,7 @@
   "license": "MIT",
   "homepage": "https://github.com/XBigTK13X/expo-libmpv#readme",
   "dependencies": {
-    "expo-build-properties": "^0.14.8",
-    "expo-screen-orientation": "^8.1.7"
+    "expo-build-properties": "^0.14.8"
   },
   "devDependencies": {
     "@types/react": "~19.0.0",
