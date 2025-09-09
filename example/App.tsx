@@ -121,12 +121,11 @@ function VideoPage({ setPage }) {
   const onPress = () => {
     setIsPlaying(!isPlaying)
     if (nativeRef.current) {
-      console.log("_----__-__ Running command")
-      nativeRef.current.runMpvCommand(`set|sub-ass-override|force`);
-      nativeRef.current.runMpvCommand(`set|sub-font-size|${20 + Math.floor(Math.random() * 10)}`)
+      console.log("=-=-=-=-=-=-=- Running command =-=-=-=-=-=-")
+      nativeRef.current.runCommand(`set|sub-ass-override|force`);
+      nativeRef.current.runCommand(`set|sub-font-size|${20 + Math.floor(Math.random() * 10)}`)
     }
   }
-
 
   const animeUrl = 'http://juggernaut.9914.us/tv/anime/precure/Star ☆ Twinkle Precure/Season 1/S01E006 - An Imagination of Darkness! The Dark Pen Appears!.mkv'
   const videoUrl = animeUrl;

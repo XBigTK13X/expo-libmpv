@@ -9,7 +9,7 @@ class LibmpvVideoModule : Module() {
     View(LibmpvVideoView::class) {
       Events("onLibmpvLog", "onLibmpvEvent")
 
-      AsyncFunction("runMpvCommand") { view: LibmpvVideoView, orders: String ->
+      AsyncFunction("runCommand") { view: LibmpvVideoView, orders: String ->
         view.runCommand(orders)
       }
 

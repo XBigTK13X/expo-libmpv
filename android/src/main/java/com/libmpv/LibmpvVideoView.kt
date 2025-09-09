@@ -137,8 +137,9 @@ class LibmpvVideoView(context: Context, appContext: AppContext) :
   override fun surfaceCreated(holder: SurfaceHolder) {
     val width = surfaceWidth ?: 0
     val height = surfaceHeight ?: 0
-    holder.setFixedSize(width, height)
-    mpv.setPropertyString("android-surface-size", "${width}x$height")
+    // In the new Fabric version, this is stretching the content
+    //holder.setFixedSize(width, height)
+    //mpv.setPropertyString("android-surface-size", "${width}x${height}")
     mpv.attachSurface(surfaceView)
     prepareMpvPlayback()
     isSurfaceCreated = true

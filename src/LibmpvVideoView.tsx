@@ -75,7 +75,7 @@ export const LibmpvVideo = React.forwardRef((props: LibmpvVideoViewProps, parent
     }
   }
   React.useImperativeHandle(parentRef, () => ({
-    runMpvCommand: callNativeMethod("runCommand"),
+    runCommand: callNativeMethod("runCommand"),
     setOptionString: callNativeMethod("setOptionString")
   }));
 
