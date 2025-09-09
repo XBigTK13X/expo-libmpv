@@ -68,21 +68,18 @@ export const LibmpvVideo = React.forwardRef((props: any, parentRef: any) => {
   }
 
   // Allow a parent to call native methods, such as tweaking subtitle properties
-  const callNativeMethod = (target: string) => {
-    return (pipeDelimitedArguments: string) => {
+
+  React.useImperativeHandle(parentRef, () => ({
+    runCommand: (pipeDelimitedArguments: string) => {
       if (nativeRef.current) {
-        if (target === 'runCommand') {
-          nativeRef.current.runCommand(pipeDelimitedArguments)
-        }
-        else if (target === 'setOptionString') {
-          nativeRef.current.setOptionString(pipeDelimitedArguments)
-        }
+        nativeRef.current.runCommand(pipeDelimitedArguments)
+      }
+    },
+    setOptionString: (pipeDelimitedArguments: string) => {
+      if (nativeRef.current) {
+        nativeRef.current.setOptionString(pipeDelimitedArguments)
       }
     }
-  }
-  React.useImperativeHandle(parentRef, () => ({
-    runCommand: callNativeMethod("runCommand"),
-    setOptionString: callNativeMethod("setOptionString")
   }));
 
 
