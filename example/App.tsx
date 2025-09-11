@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { View, Button, Modal, TouchableOpacity, AppState, Text } from 'react-native';
+import { View, Pressable, Modal, TouchableOpacity, AppState, Text } from 'react-native';
 import { LibmpvVideo } from 'expo-libmpv';
 
 const circularReplacer = () => {
@@ -16,6 +16,13 @@ const circularReplacer = () => {
 };
 
 const TRACK_DISABLED = -1;
+const FIVE_MINUTES = 300;
+
+const animeUrl = 'http://juggernaut.9914.us/tv/anime/precure/Star ☆ Twinkle Precure/Season 1/S01E006 - An Imagination of Darkness! The Dark Pen Appears!.mkv'
+const cartoonSubbedUrl = 'http://juggernaut.9914.us/tv/cartoon/k/King of the Hill/Season 14/S14E003 - Chore Money, Chore Problems.mkv'
+const videoUrl = cartoonSubbedUrl;
+let audioTrack = 0
+let subtitleTrack = 0
 
 const resolutions = {
   ultraHd: {
@@ -36,7 +43,7 @@ const styles = {
     backgroundColor: 'black'
   },
   homeButton: {
-    width: '75%',
+    width: '75%'
   },
   container: {
     flex: 1,
@@ -49,9 +56,19 @@ const styles = {
     height: 60,
     marginVertical: 20,
   },
+  video: {
+    flex: 1
+  },
   button: {
-    flex: 1,
-    backgroundColor: 'black'
+    height: 250,
+    backgroundColor: 'blue',
+    textAlign: 'center',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 60
   }
 }
 
@@ -59,7 +76,9 @@ function LandingPage({ setPage }) {
   return (
     <View style={styles.homePage}>
       <View style={styles.homeButton}>
-        <Button onPress={() => { setPage('video') }} title="Play Video" />
+        <Pressable style={styles.button} onPress={() => { setPage('video') }}>
+          <Text style={styles.buttonText}>Play Video</Text>
+        </Pressable>
       </View>
     </View>
   )
@@ -100,7 +119,7 @@ function VideoPage({ setPage }) {
       console.log("=-=-=-=-=-=-==- NATIVE METHOD =-=-=-=--==-=")
     }
     if (seekSeconds === 0 && libmpvLog.text && libmpvLog.text.indexOf('Starting playback') !== -1) {
-      //setSeekSeconds(300)
+      setSeekSeconds(FIVE_MINUTES)
     }
     if (libmpvLog.text && libmpvLog.text.indexOf('Opening failed or was aborted') !== -1) {
       setError("Unable to open file.")
@@ -121,8 +140,6 @@ function VideoPage({ setPage }) {
     }
   }
 
-  const animeUrl = 'http://juggernaut.9914.us/tv/anime/precure/Star ☆ Twinkle Precure/Season 1/S01E006 - An Imagination of Darkness! The Dark Pen Appears!.mkv'
-  const videoUrl = animeUrl;
   console.log({ videoUrl })
   return (
     <Modal style={styles.container} onRequestClose={() => {
@@ -130,7 +147,7 @@ function VideoPage({ setPage }) {
     }}>
       <TouchableOpacity
         transparent
-        style={styles.button}
+        style={styles.video}
         onPress={onPress} >
         <LibmpvVideo
           ref={nativeRef}
@@ -139,8 +156,8 @@ function VideoPage({ setPage }) {
           useHardwareDecoder={true}
           surfaceWidth={resolutions.fullHd.width}
           surfaceHeight={resolutions.fullHd.height}
-          selectedAudioTrack={0}
-          selectedSubtitleTrack={0}
+          selectedAudioTrack={audioTrack}
+          selectedSubtitleTrack={subtitleTrack}
           seekToSeconds={seekSeconds}
           onLibmpvEvent={onLibmpvEvent}
           onLibmpvLog={onLibmpvLog}
