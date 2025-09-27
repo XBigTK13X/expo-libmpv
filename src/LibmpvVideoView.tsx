@@ -37,8 +37,6 @@ const LibmpvVideoView: React.ComponentType<LibmpvVideoViewProps> =
   requireNativeView('LibmpvVideo');
 
 export const LibmpvVideo = React.forwardRef<LibmpvNativeMethods, LibmpvVideoViewProps>((props: any, parentRef: any) => {
-  const nativeRef = React.useRef<any>(null);
-
   // Pass mpv events and logs back up to the parent
   const onLogEvent = (libmpvEvent: any) => {
     if (props.onLibmpvEvent) {
@@ -67,19 +65,11 @@ export const LibmpvVideo = React.forwardRef<LibmpvNativeMethods, LibmpvVideoView
     }
   }
 
-  // Allow a parent to call native methods, such as tweaking subtitle properties
-
-  React.useImperativeHandle(parentRef, () => ({
-    runCommand: (pipeDelimitedArguments: string) => nativeRef.current?.runCommand?.(pipeDelimitedArguments),
-    setOptionString: (pipeDelimitedArguments: string) => nativeRef.current?.setOptionString?.(pipeDelimitedArguments),
-  }));
-
-
   // The order props are handled in the native code is non-deterministic
   // Each native prop setter checks to see if all required props are set
   // Only then will it try to create an instance of mpv
   return <LibmpvVideoView
-    ref={nativeRef}
+    ref={parentRef}
     style={props.surfaceStyle ? props.surfaceStyle : styles.videoPlayer}
     playUrl={props.playUrl}
     isPlaying={props.isPlaying}
