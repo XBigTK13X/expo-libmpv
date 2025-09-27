@@ -1,7 +1,7 @@
 import { requireNativeView } from 'expo';
 import * as React from 'react';
 
-import { LibmpvVideoViewProps } from './LibmpvVideo.types';
+import { LibmpvVideoViewProps, LibmpvNativeMethods } from './LibmpvVideo.types';
 
 const styles: any = {
   videoPlayer: {
@@ -36,7 +36,7 @@ const EVENT_LOOKUP: any = {
 const LibmpvVideoView: React.ComponentType<LibmpvVideoViewProps> =
   requireNativeView('LibmpvVideo');
 
-export const LibmpvVideo = React.forwardRef((props: any, parentRef: any) => {
+export const LibmpvVideo = React.forwardRef<LibmpvNativeMethods, LibmpvVideoViewProps>((props: any, parentRef: any) => {
   const nativeRef = React.useRef<any>(null);
 
   // Pass mpv events and logs back up to the parent
@@ -70,16 +70,8 @@ export const LibmpvVideo = React.forwardRef((props: any, parentRef: any) => {
   // Allow a parent to call native methods, such as tweaking subtitle properties
 
   React.useImperativeHandle(parentRef, () => ({
-    runCommand: (pipeDelimitedArguments: string) => {
-      if (nativeRef.current) {
-        nativeRef.current.runCommand(pipeDelimitedArguments)
-      }
-    },
-    setOptionString: (pipeDelimitedArguments: string) => {
-      if (nativeRef.current) {
-        nativeRef.current.setOptionString(pipeDelimitedArguments)
-      }
-    }
+    runCommand: (pipeDelimitedArguments: string) => nativeRef.current?.runCommand?.(pipeDelimitedArguments),
+    setOptionString: (pipeDelimitedArguments: string) => nativeRef.current?.setOptionString?.(pipeDelimitedArguments),
   }));
 
 

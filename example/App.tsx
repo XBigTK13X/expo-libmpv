@@ -15,6 +15,8 @@ const circularReplacer = () => {
   };
 };
 
+const DEBUG_EVENTS = false
+
 const TRACK_DISABLED = -1;
 const FIVE_MINUTES = 300;
 
@@ -109,15 +111,20 @@ function VideoPage({ setPage }) {
   }
 
   function onLibmpvEvent(libmpvEvent) {
-    if (!libmpvEvent.property || libmpvEvent.property !== 'track-list') {
-      console.log(JSON.stringify({ libmpvEvent }, circularReplacer(), 4))
+    if (DEBUG_EVENTS) {
+      if (!libmpvEvent.property || libmpvEvent.property !== 'track-list') {
+        console.log(JSON.stringify({ libmpvEvent }, circularReplacer(), 4))
+      }
     }
   }
 
   function onLibmpvLog(libmpvLog) {
-    if (libmpvLog.hasOwnProperty('method')) {
-      console.log("=-=-=-=-=-=-==- NATIVE METHOD =-=-=-=--==-=")
+    if (DEBUG_EVENTS) {
+      if (libmpvLog.hasOwnProperty('method')) {
+        console.log("=-=-=-=-=-=-==- NATIVE METHOD =-=-=-=--==-=")
+      }
     }
+
     if (seekSeconds === 0 && libmpvLog.text && libmpvLog.text.indexOf('Starting playback') !== -1) {
       setSeekSeconds(FIVE_MINUTES)
     }
@@ -127,8 +134,9 @@ function VideoPage({ setPage }) {
     if (libmpvLog.text && libmpvLog.prefix === 'vd' && libmpvLog.text.indexOf('Using software decoding') !== -1) {
       //setError("Unable to use hardware decoding!.")
     }
-
-    console.log(JSON.stringify({ libmpvLog }, circularReplacer(), 4))
+    if (DEBUG_EVENTS) {
+      console.log(JSON.stringify({ libmpvLog }, circularReplacer(), 4))
+    }
   }
 
   const onPress = () => {

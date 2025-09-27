@@ -12,3 +12,8 @@ export type LibmpvVideoViewProps = {
   onLibmpvEvent: (libmpvEvent: any) => void,
   onLibmpvLog: (libmpvLog: any) => void,
 };
+
+export type LibmpvNativeMethods = {
+  runCommand: (pipeDelimitedArguments: string) => void | Promise<void>;
+  setOptionString: (pipeDelimitedArguments: string) => void | Promise<void>;
+};
