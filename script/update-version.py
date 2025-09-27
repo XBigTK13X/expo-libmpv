@@ -4,6 +4,7 @@ import os
 import sys
 import datetime
 
+APP_JSON_PATH = './app.json'
 PACKAGE_JSON_PATH = './package.json'
 BUILD_GRADLE_PATH = './android/build.gradle'
 
@@ -44,11 +45,16 @@ def update_info(
     with open(input_path,'w') as write_handle:
         write_handle.write(file_content)
 
+update_info(
+    input_path=APP_JSON_PATH,
+    version_needle='"runtimeVersion"',
+    version_replacement=f'        "runtimeVersion": "{build_version}",'
+)
 
 update_info(
     input_path=PACKAGE_JSON_PATH,
     version_needle='"version"',
-    version_replacement=f'    "version": "{build_version}",\n'
+    version_replacement=f'  "version": "{build_version}",\n'
 )
 
 update_info(
