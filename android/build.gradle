@@ -1,10 +1,7 @@
 apply plugin: 'com.android.library'
 
 group = 'com.libmpv'
-version = '0.2.3'
-def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.absolutePath, "ExpoModulesCorePlugin.gradle")
-apply from: expoModulesCorePlugin
-applyKotlinExpoModulesCorePlugin()
+version = '0.2.4'
 useCoreDependencies()
 useExpoPublishing()
 
@@ -43,7 +40,7 @@ android {
   namespace "com.libmpv"
   defaultConfig {
     versionCode 1
-        versionName "0.2.3"
+    versionName "0.2.4"
   }
   lintOptions {
     abortOnError false
