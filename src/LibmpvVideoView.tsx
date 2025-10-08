@@ -37,6 +37,14 @@ const LibmpvVideoView: React.ComponentType<LibmpvVideoViewProps> =
   requireNativeView('LibmpvVideo');
 
 export const LibmpvVideo = React.forwardRef<LibmpvNativeMethods, LibmpvVideoViewProps>((props: any, parentRef: any) => {
+  React.useEffect(() => {
+    return () => {
+      if (parentRef?.current?.cleanup) {
+        parentRef.current.cleanup();
+      }
+    };
+  }, []);
+
   // Pass mpv events and logs back up to the parent
   const onLogEvent = (libmpvEvent: any) => {
     if (props.onLibmpvEvent) {

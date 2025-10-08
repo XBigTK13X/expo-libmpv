@@ -1,9 +1,13 @@
 package com.libmpv
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.widget.FrameLayout
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import dev.jdtech.mpv.MPVLib
 import expo.modules.kotlin.AppContext
 import expo.modules.kotlin.views.ExpoView
@@ -41,12 +45,18 @@ class LibmpvVideoView(context: Context, appContext: AppContext) :
         FrameLayout.LayoutParams.MATCH_PARENT,
         FrameLayout.LayoutParams.MATCH_PARENT
     )
-    addView(surfaceView, layoutParams)
+  appContext.activityProvider?.currentActivity?.let { activity ->
+    if (activity is androidx.lifecycle.LifecycleOwner) {
+      activity.lifecycle.addObserver(object : DefaultLifecycleObserver {
+        override fun onDestroy(owner: LifecycleOwner) {
+          log("LibmpvVideoView", "Lifecycle onDestroy -> cleanup()")
+          cleanup()
+        }
+      })
+    }
   }
 
-  fun cleanup() {
-    surfaceView.holder.removeCallback(this)
-    mpv.cleanup()
+    addView(surfaceView, layoutParams)
   }
 
   fun isSurfaceReady(): Boolean = isSurfaceCreated
@@ -176,10 +186,30 @@ class LibmpvVideoView(context: Context, appContext: AppContext) :
 
   override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {}
 
+fun cleanup() {
+  // Launch on background executor so UI returns immediately
+  Thread {
+    try {
+      try { mpv.setPropertyString("pause", "yes") } catch (_: Throwable) {}
+      try { mpv.setPropertyString("ao", "null") } catch (_: Throwable) {}
+      Handler(Looper.getMainLooper()).post {
+        try {
+          surfaceView.holder.removeCallback(this@LibmpvVideoView)
+          mpv.cleanup()
+        } catch (e: Exception) {
+        }
+      }
+    } catch (_: Throwable) {}
+  }.start()
+}
+
   override fun surfaceDestroyed(holder: SurfaceHolder) {
-    mpv.setPropertyString("vo", "null")
-    mpv.setPropertyString("force-window", "no")
-    mpv.detachSurface()
+    try {
+      mpv.setPropertyString("pause", "yes")
+      mpv.setPropertyString("vo", "null")
+      mpv.setPropertyString("force-window", "no")
+    } catch (_: Throwable) {}
+    try { mpv.detachSurface() } catch (_: Throwable) {}
   }
 
   // MPVLib.LogObserver
@@ -236,5 +266,10 @@ class LibmpvVideoView(context: Context, appContext: AppContext) :
       "eventId" to "$eventId",
       "kind" to "eventId"
     ))
+  }
+
+  override fun onDetachedFromWindow() {
+    super.onDetachedFromWindow()
+    cleanup()
   }
 }
