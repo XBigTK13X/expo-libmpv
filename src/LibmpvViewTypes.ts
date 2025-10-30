@@ -1,4 +1,4 @@
-export type LibmpvVideoViewProps = {
+export type LibmpvViewProps = {
   ref: any,
   style: any,
   playUrl: string,
@@ -13,7 +13,7 @@ export type LibmpvVideoViewProps = {
   onLibmpvLog: (libmpvLog: any) => void,
 };
 
-export type LibmpvNativeMethods = {
+export type LibmpvViewNativeMethods = {
   runCommand: (pipeDelimitedArguments: string) => void | Promise<void>;
   setOptionString: (pipeDelimitedArguments: string) => void | Promise<void>;
 };

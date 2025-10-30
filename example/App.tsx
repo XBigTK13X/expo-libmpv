@@ -1,6 +1,7 @@
 import * as React from 'react';
+import { findNodeHandle } from 'react-native'
 import { View, Pressable, Modal, TouchableOpacity, AppState, Text } from 'react-native';
-import { LibmpvVideo } from 'expo-libmpv';
+import Libmpv from 'expo-libmpv';
 
 const circularReplacer = () => {
   const seen = new WeakSet();
@@ -15,7 +16,7 @@ const circularReplacer = () => {
   };
 };
 
-const DEBUG_EVENTS = false
+const DEBUG_EVENTS = true
 
 const TRACK_DISABLED = -1;
 const FIVE_MINUTES = 300;
@@ -139,12 +140,16 @@ function VideoPage({ setPage }) {
     }
   }
 
-  const onPress = () => {
+  const onPress = async () => {
     setIsPlaying(!isPlaying)
     if (nativeRef.current) {
       console.log("=-=-=-=-=-=-=- Running command =-=-=-=-=-=-")
-      nativeRef.current.runCommand(`set|sub-ass-override|force`);
-      nativeRef.current.runCommand(`set|sub-font-size|${20 + Math.floor(Math.random() * 10)}`)
+      const handle = findNodeHandle(nativeRef.current);
+      const currentSize = await Libmpv.Module.getProperty(handle, 'sub-font-size');
+      if (currentSize !== null) {
+        nativeRef.current.runCommand(`set|sub-ass-override|force`);
+        nativeRef.current.runCommand(`set|sub-font-size|${currentSize + 4}`)
+      }
     }
   }
 
@@ -157,7 +162,7 @@ function VideoPage({ setPage }) {
         transparent
         style={styles.video}
         onPress={onPress} >
-        <LibmpvVideo
+        <Libmpv.View
           ref={nativeRef}
           isPlaying={isPlaying}
           playUrl={videoUrl}

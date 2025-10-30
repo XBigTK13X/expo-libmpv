@@ -4,7 +4,8 @@
   ],
   "android": {
     "modules": [
-      "com.libmpv.LibmpvVideoModule"
+      "com.libmpv.LibmpvModule",
+      "com.libmpv.LibmpvViewModule"
     ]
   }
 }

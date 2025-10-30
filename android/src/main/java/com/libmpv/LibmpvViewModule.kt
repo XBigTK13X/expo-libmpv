@@ -3,25 +3,26 @@ package com.libmpv
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 
-class LibmpvVideoModule : Module() {
+class LibmpvViewModule : Module() {
   override fun definition() = ModuleDefinition {
-    Name("LibmpvVideo")
-    View(LibmpvVideoView::class) {
+    Name("LibmpvView")
+
+    View(LibmpvView::class) {
         Events("onLibmpvLog", "onLibmpvEvent")
 
-        AsyncFunction("runCommand") { view: LibmpvVideoView, orders: String ->
+        AsyncFunction("runCommand") { view: LibmpvView, orders: String ->
             view.runCommand(orders)
         }
 
-        AsyncFunction("setOptionString") { view: LibmpvVideoView, options: String ->
+        AsyncFunction("setOptionString") { view: LibmpvView, options: String ->
             view.setOptionString(options)
         }
 
-        AsyncFunction("cleanup") { view: LibmpvVideoView ->
+        AsyncFunction("cleanup") { view: LibmpvView ->
             view.cleanup()
         }
 
-        Prop("playUrl") { view: LibmpvVideoView, playUrl: String ->
+        Prop("playUrl") { view: LibmpvView, playUrl: String ->
             view.playUrl = playUrl
             if (view.isSurfaceReady()) {
                 view.mpv.play(playUrl)
@@ -31,7 +32,7 @@ class LibmpvVideoModule : Module() {
             view.log("setPlayUrl", playUrl)
         }
 
-        Prop("useHardwareDecoder") { view: LibmpvVideoView, useHardwareDecoder: Boolean ->
+        Prop("useHardwareDecoder") { view: LibmpvView, useHardwareDecoder: Boolean ->
             view.useHardwareDecoder = useHardwareDecoder
             if (view.isSurfaceReady()) {
                 view.setHardwareDecoder(useHardwareDecoder)
@@ -41,7 +42,7 @@ class LibmpvVideoModule : Module() {
             view.log("setUseHardwareDecoder", "$useHardwareDecoder")
         }
 
-        Prop("surfaceWidth") { view: LibmpvVideoView, surfaceWidth: Int ->
+        Prop("surfaceWidth") { view: LibmpvView, surfaceWidth: Int ->
             view.surfaceWidth = surfaceWidth
             if (view.isSurfaceReady()) {
                 view.mpv.setSurfaceWidth(surfaceWidth)
@@ -51,7 +52,7 @@ class LibmpvVideoModule : Module() {
             view.log("setSurfaceWidth", "$surfaceWidth")
         }
 
-        Prop("surfaceHeight") { view: LibmpvVideoView, surfaceHeight: Int ->
+        Prop("surfaceHeight") { view: LibmpvView, surfaceHeight: Int ->
             view.surfaceHeight = surfaceHeight
             if (view.isSurfaceReady()) {
                 view.mpv.setSurfaceHeight(surfaceHeight)
@@ -61,7 +62,7 @@ class LibmpvVideoModule : Module() {
             view.log("setSurfaceHeight", "$surfaceHeight")
         }
 
-        Prop("selectedAudioTrack") { view: LibmpvVideoView, audioTrackIndex: Int ->
+        Prop("selectedAudioTrack") { view: LibmpvView, audioTrackIndex: Int ->
             view.audioIndex = audioTrackIndex
             if (view.isSurfaceReady()) {
                 val mpvIndex = if (audioTrackIndex != -1) (audioTrackIndex + 1).toString() else "no"
@@ -72,7 +73,7 @@ class LibmpvVideoModule : Module() {
             view.log("selectAudioTrack", "$audioTrackIndex")
         }
 
-        Prop("selectedSubtitleTrack") { view: LibmpvVideoView, subtitleTrackIndex: Int ->
+        Prop("selectedSubtitleTrack") { view: LibmpvView, subtitleTrackIndex: Int ->
             view.subtitleIndex = subtitleTrackIndex
             if (view.isSurfaceReady()) {
                 val mpvIndex = if (subtitleTrackIndex != -1) (subtitleTrackIndex + 1).toString() else "no"
@@ -83,14 +84,16 @@ class LibmpvVideoModule : Module() {
             view.log("selectSubtitleTrack", "$subtitleTrackIndex")
         }
 
-        Prop("seekToSeconds") { view: LibmpvVideoView, seconds: Int ->
+        Prop("seekToSeconds") { view: LibmpvView, seconds: Int ->
             if (view.isSurfaceReady()) {
                 view.mpv.seekToSeconds(seconds)
+            } else {
+                view.seekToSeconds = seconds
             }
             view.log("seekToSeconds", "$seconds")
         }
 
-        Prop("isPlaying") { view: LibmpvVideoView, isPlaying: Boolean ->
+        Prop("isPlaying") { view: LibmpvView, isPlaying: Boolean ->
             if (view.isSurfaceReady() && view.mpv.hasPlayedOnce()) {
                 when {
                     isPlaying && !view.mpv.isPlaying() -> {
@@ -105,7 +108,7 @@ class LibmpvVideoModule : Module() {
             }
         }
 
-        OnViewDestroys { view: LibmpvVideoView ->
+        OnViewDestroys { view: LibmpvView ->
             view.cleanup()
         }
     }

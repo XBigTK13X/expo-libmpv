@@ -1,7 +1,6 @@
 import { requireNativeView } from 'expo';
 import * as React from 'react';
-
-import { LibmpvVideoViewProps, LibmpvNativeMethods } from './LibmpvVideo.types';
+import { LibmpvViewProps, LibmpvViewNativeMethods } from './LibmpvViewTypes';
 
 const styles: any = {
   videoPlayer: {
@@ -33,10 +32,9 @@ const EVENT_LOOKUP: any = {
   25: 'HOOK'
 }
 
-const LibmpvVideoView: React.ComponentType<LibmpvVideoViewProps> =
-  requireNativeView('LibmpvVideo');
+const LibmpvViewNative: React.ComponentType<LibmpvViewProps> = requireNativeView('LibmpvView');
 
-export const LibmpvVideo = React.forwardRef<LibmpvNativeMethods, LibmpvVideoViewProps>((props: any, parentRef: any) => {
+export const LibmpvView = React.forwardRef<LibmpvViewNativeMethods, LibmpvViewProps>((props: any, parentRef: any) => {
   React.useEffect(() => {
     return () => {
       if (parentRef?.current?.cleanup) {
@@ -76,7 +74,7 @@ export const LibmpvVideo = React.forwardRef<LibmpvNativeMethods, LibmpvVideoView
   // The order props are handled in the native code is non-deterministic
   // Each native prop setter checks to see if all required props are set
   // Only then will it try to create an instance of mpv
-  return <LibmpvVideoView
+  return <LibmpvViewNative
     ref={parentRef}
     style={props.surfaceStyle ? props.surfaceStyle : styles.videoPlayer}
     playUrl={props.playUrl}
@@ -92,4 +90,4 @@ export const LibmpvVideo = React.forwardRef<LibmpvNativeMethods, LibmpvVideoView
   />
 })
 
-export default LibmpvVideo
+export default LibmpvView
