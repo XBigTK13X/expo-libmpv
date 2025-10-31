@@ -16,14 +16,14 @@ const circularReplacer = () => {
   };
 };
 
-const DEBUG_EVENTS = true
+const DEBUG_EVENTS = false
 
 const TRACK_DISABLED = -1;
 const FIVE_MINUTES = 300;
 
 const animeUrl = 'http://juggernaut.9914.us/tv/anime/precure/Star ☆ Twinkle Precure/Season 1/S01E006 - An Imagination of Darkness! The Dark Pen Appears!.mkv'
 const cartoonSubbedUrl = 'http://juggernaut.9914.us/tv/cartoon/k/King of the Hill/Season 14/S14E003 - Chore Money, Chore Problems.mkv'
-const videoUrl = cartoonSubbedUrl;
+const videoUrl = animeUrl;
 let audioTrack = 0
 let subtitleTrack = 0
 
@@ -113,7 +113,7 @@ function VideoPage({ setPage }) {
 
   function onLibmpvEvent(libmpvEvent) {
     if (DEBUG_EVENTS) {
-      if (!libmpvEvent.property || libmpvEvent.property !== 'track-list') {
+      if (!libmpvEvent.property && libmpvEvent.property !== 'track-list' && libmpvEvent?.property !== 'demuxer-cache-time') {
         console.log(JSON.stringify({ libmpvEvent }, circularReplacer(), 4))
       }
     }
@@ -145,10 +145,10 @@ function VideoPage({ setPage }) {
     if (nativeRef.current) {
       console.log("=-=-=-=-=-=-=- Running command =-=-=-=-=-=-")
       const handle = findNodeHandle(nativeRef.current);
-      const currentSize = await Libmpv.Module.getProperty(handle, 'sub-font-size');
+      let currentSize = await Libmpv.Module.getProperty(handle, 'sub-scale');
       if (currentSize !== null) {
-        nativeRef.current.runCommand(`set|sub-ass-override|force`);
-        nativeRef.current.runCommand(`set|sub-font-size|${currentSize + 4}`)
+        currentSize = parseFloat(currentSize)
+        nativeRef.current.runCommand(`set|sub-scale|${currentSize + .1}`)
       }
     }
   }

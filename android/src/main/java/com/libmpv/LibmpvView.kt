@@ -65,8 +65,6 @@ class LibmpvView(context: Context, appContext: AppContext) :
     addView(surfaceView, layoutParams)
   }
 
-  private fun isAlive(): Boolean = mpv.isAlive()
-
   fun isSurfaceReady(): Boolean = isSurfaceCreated
 
   fun attemptCreation() {
@@ -92,18 +90,15 @@ class LibmpvView(context: Context, appContext: AppContext) :
   }
 
   fun runCommand(orders: String) {
-    if (!isAlive()) return
     mpv.command(orders.split("|").toTypedArray())
   }
 
   fun setOptionString(options: String) {
-    if (!isAlive()) return
     val parts = options.split("|").toTypedArray()
     if (parts.size == 2) mpv.setOptionString(parts[0], parts[1])
   }
 
   fun getProperty(name: String): String? {
-    if (!isAlive()) return null
     return runBlocking { mpv.getProperty(name) }
   }
 
@@ -149,7 +144,6 @@ class LibmpvView(context: Context, appContext: AppContext) :
     mpv.setOptionString("cache-pause-initial", "yes")
     mpv.setOptionString("cache-secs", "5")
     mpv.setOptionString("demuxer-readahead-secs", "5")
-    mpv.setOptionString("msg-level", "all=v")
   }
 
   fun log(method: String, argument: String) {
@@ -179,7 +173,6 @@ class LibmpvView(context: Context, appContext: AppContext) :
   }
 
   fun setHardwareDecoder(useHardware: Boolean) {
-    if (!isAlive()) return
     useHardwareDecoder = useHardware
     if (useHardware) {
       mpv.setOptionString("hwdec", HARDWARE_OPTIONS)
@@ -196,7 +189,6 @@ class LibmpvView(context: Context, appContext: AppContext) :
     cleaning = true
     Thread {
       try {
-        if (!isAlive()) return@Thread
         runCatching { mpv.setPropertyString("pause", "yes") }
         runCatching { mpv.setPropertyString("ao", "null") }
 
@@ -212,7 +204,6 @@ class LibmpvView(context: Context, appContext: AppContext) :
   }
 
   override fun surfaceDestroyed(holder: SurfaceHolder) {
-    if (!isAlive()) return
     runCatching { mpv.setPropertyString("pause", "yes") }
     runCatching { mpv.setPropertyString("vo", "null") }
     runCatching { mpv.setPropertyString("force-window", "no") }

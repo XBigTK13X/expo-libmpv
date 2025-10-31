@@ -1,233 +1,159 @@
-
 package com.libmpv
 
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.content.Context
 import android.util.Log
 import android.view.SurfaceView
 import dev.jdtech.mpv.MPVLib
 import java.io.File
 import java.io.FileOutputStream
-import java.util.concurrent.Executors
-import java.util.concurrent.ExecutorService
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
 class LibmpvWrapper(private val applicationContext: Context) {
     companion object {
         private const val TAG = "react-native-libmpv"
-        private var swallow = true
     }
 
     private enum class State { NEW, CREATED, INIT, RUNNING, CLEANUP, DESTROYED }
 
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val mpv = MPVLib()
+
     @Volatile private var created = false
-    @Volatile private var destroying = false
-    @Volatile private var isDestroyed = false
     @Volatile private var cleaning = false
+    @Volatile private var isDestroyed = false
+    @Volatile private var state = State.NEW
+
     private var isPlaying = false
     private var hasPlayedOnce = false
+    private var mpvDirectory: String? = null
     private var eventObserver: MPVLib.EventObserver? = null
     private var logObserver: MPVLib.LogObserver? = null
-    private var mpvDirectory: String? = null
+    private var surfaceView: SurfaceView? = null
     private var surfaceWidth: Int = -1
     private var surfaceHeight: Int = -1
-    private var surfaceView: SurfaceView? = null
-    private val mpv: MPVLib = MPVLib()
-
-    fun isAlive() = !isDestroyed
-
-    @Volatile private var state: State = State.NEW
-    private val mainHandler = Handler(Looper.getMainLooper())
-    private var mpvExec: ExecutorService = Executors.newSingleThreadExecutor()
 
     private inline fun safe(block: () -> Unit) {
-        try { if (created && state < State.CLEANUP) block() } catch (e: Exception) { logException(e) }
+        try { block() } catch (e: Exception) { logException(e) }
     }
 
-    private fun onMpvThread(block: () -> Unit) {
-        if (state >= State.CLEANUP) return
-        mpvExec.execute {
-            if (state >= State.CLEANUP) return@execute
-            try { block() } catch (e: Exception) { logException(e) }
-        }
+    private fun logException(e: Exception) {
+        try {
+            Log.e(TAG, "mpv exception", e)
+            logObserver?.logMessage("RNLE", 20, e.message ?: "unknown native error")
+        } catch (_: Throwable) {}
+    }
+
+    private fun ensureUi(block: () -> Unit) {
+        if (Looper.myLooper() == Looper.getMainLooper()) block()
+        else mainHandler.post(block)
     }
 
     fun create(): Boolean {
-        onMpvThread {
-            mpv.create(applicationContext)
-            createMpvDirectory()
-            created = true
-            state = State.CREATED
+        ensureUi {
+            safe {
+                mpv.create(applicationContext)
+                createMpvDirectory()
+                created = true
+                state = State.CREATED
+            }
         }
         return true
     }
 
     fun init() {
-        onMpvThread {
-            if (state == State.CREATED) {
-                mpv.init()
-                state = State.RUNNING
+        ensureUi {
+            safe {
+                if (state == State.CREATED) {
+                    mpv.init()
+                    state = State.RUNNING
+                }
             }
         }
     }
 
-    fun isCreated(): Boolean = created
-    fun isPlaying(): Boolean = isPlaying
-    fun hasPlayedOnce(): Boolean = hasPlayedOnce
-    fun getMpvDirectoryPath(): String? = mpvDirectory
+    fun destroy() = cleanup()
 
-    private fun createMpvDirectory() {
-        val mpvDir = File(applicationContext.getExternalFilesDir("mpv"), "mpv")
-        try {
-            mpvDirectory = mpvDir.absolutePath
-            if (!mpvDir.exists() && !mpvDir.mkdirs()) {
-                Log.e(TAG, "exception", IllegalArgumentException("Unable to create $mpvDir"))
-                return
-            }
-            applicationContext.assets.open("subfont.ttf").use { subfontIn ->
-                FileOutputStream("${mpvDir}/subfont.ttf").use { fontOut -> subfontIn.copyTo(fontOut) }
-            }
-            applicationContext.assets.open("mpv.conf").use { mpvConfIn ->
-                FileOutputStream("${mpvDir}/mpv.conf").use { confOut -> mpvConfIn.copyTo(confOut) }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Unable to create the directory $mpvDir", e)
+    fun cleanup() {
+        if (!created || cleaning || state >= State.CLEANUP) return
+        cleaning = true
+        state = State.CLEANUP
+        ensureUi {
+            safe { mpv.command(arrayOf("stop")) }
+            safe { mpv.setPropertyString("pause", "yes") }
+            safe { mpv.detachSurface() }
+            safe { mpv.removeObservers() }
+            safe { mpv.removeLogObservers() }
+            safe { mpv.destroy() }
+            created = false
+            isDestroyed = true
+            cleaning = false
+            state = State.DESTROYED
         }
     }
 
-    private fun logException(exception: Exception) {
-        if (isDestroyed || state >= State.CLEANUP) return
-        try {
-            val message: String = (exception.message as? String) ?: "Unable to read error message"
-            logObserver?.logMessage("RNLE", 20, message)
-        } catch (e: Exception) {
-            if (!swallow) throw e
-        }
-    }
+    fun isCreated() = created
+    fun isAlive() = !isDestroyed
+    fun isPlaying() = isPlaying
+    fun hasPlayedOnce() = hasPlayedOnce
+    fun getMpvDirectoryPath() = mpvDirectory
 
     fun addEventObserver(observer: MPVLib.EventObserver) {
-        onMpvThread {
-            mpv.removeObservers()
-            eventObserver = observer
-            mpv.addObserver(eventObserver)
-            mpv.observeProperty("demuxer-cache-time", MPVLib.MPV_FORMAT_INT64)
-            mpv.observeProperty("duration", MPVLib.MPV_FORMAT_INT64)
-            mpv.observeProperty("eof-reached", MPVLib.MPV_FORMAT_FLAG)
-            mpv.observeProperty("paused-for-cache", MPVLib.MPV_FORMAT_FLAG)
-            mpv.observeProperty("seekable", MPVLib.MPV_FORMAT_FLAG)
-            mpv.observeProperty("speed", MPVLib.MPV_FORMAT_DOUBLE)
-            mpv.observeProperty("time-pos", MPVLib.MPV_FORMAT_INT64)
-            mpv.observeProperty("track-list", MPVLib.MPV_FORMAT_STRING)
+        ensureUi {
+            safe {
+                mpv.removeObservers()
+                eventObserver = observer
+                mpv.addObserver(observer)
+            }
         }
     }
 
     fun addLogObserver(observer: MPVLib.LogObserver) {
-        onMpvThread {
-            mpv.removeLogObservers()
-            logObserver = observer
-            mpv.addLogObserver(logObserver)
+        ensureUi {
+            safe {
+                mpv.removeLogObservers()
+                logObserver = observer
+                mpv.addLogObserver(observer)
+            }
         }
     }
 
-    fun setOptionString(option: String, setting: String) {
-        onMpvThread { if (state == State.RUNNING) mpv.setOptionString(option, setting) }
+    fun setOptionString(option: String, value: String) {
+        ensureUi { safe { mpv.setOptionString(option, value) } }
     }
 
-    fun setPropertyString(property: String, setting: String) {
-        onMpvThread { if (state == State.RUNNING) mpv.setPropertyString(property, setting) }
+    fun setPropertyString(property: String, value: String) {
+        ensureUi { safe { mpv.setPropertyString(property, value) } }
     }
 
     suspend fun getProperty(name: String): String? =
         suspendCancellableCoroutine { cont ->
-            if (!isAlive()) {
-                cont.resume(null)
-                return@suspendCancellableCoroutine
-            }
-
-            mpvExec.execute {
-                try {
-                    if (isDestroyed) cont.resume(null)
-                    else cont.resume(mpv.getPropertyString(name))
-                } catch (e: Exception) {
-                    logException(e)
-                    cont.resume(null)
-                }
+            ensureUi {
+                try { cont.resume(mpv.getPropertyString(name)) }
+                catch (e: Exception) { logException(e); cont.resume(null) }
             }
         }
 
     fun command(orders: Array<String>) {
-        onMpvThread { if (state >= State.CREATED && state < State.CLEANUP) mpv.command(orders) }
+        ensureUi { safe { mpv.command(orders) } }
     }
 
     fun attachSurface(surfaceView: SurfaceView) {
         this.surfaceView = surfaceView
         applySurfaceDimensions()
-        onMpvThread {
-            if (state >= State.CREATED && state < State.CLEANUP) {
-                mpv.attachSurface(surfaceView.holder.surface)
+        ensureUi {
+            safe {
+                if (state >= State.CREATED && state < State.CLEANUP) {
+                    mpv.attachSurface(surfaceView.holder.surface)
+                }
             }
         }
     }
 
     fun detachSurface() {
-        onMpvThread {
-            if (state >= State.CREATED && state < State.CLEANUP) {
-                mpv.detachSurface()
-                surfaceView = null
-            }
-        }
-    }
-
-    fun play(url: String, options: String? = null) {
-        if (state >= State.CLEANUP) return
-        if (!isPlaying) {
-            if (options == null) {
-                command(arrayOf("loadfile", url))
-            } else {
-                command(arrayOf("loadfile", url, "replace", "0", options))
-            }
-            command(arrayOf("set", "pause", "no"))
-            hasPlayedOnce = true
-            isPlaying = true
-        }
-    }
-
-    fun pauseOrUnpause() {
-        if (state >= State.CLEANUP) return
-        if (!hasPlayedOnce) return
-        if (isPlaying) pause() else unpause()
-    }
-
-    fun pause() {
-        if (state >= State.CLEANUP) return
-        if (!hasPlayedOnce) return
-        if (isPlaying) {
-            command(arrayOf("set", "pause", "yes"))
-            isPlaying = false
-        }
-    }
-
-    fun unpause() {
-        if (state >= State.CLEANUP) return
-        if (!hasPlayedOnce) return
-        if (!isPlaying) {
-            command(arrayOf("set", "pause", "no"))
-            isPlaying = true
-        }
-    }
-
-    fun seekToSeconds(seconds: Int) {
-        if (state >= State.CLEANUP) return
-        if (created) command(arrayOf("seek", seconds.toString(), "absolute"))
-    }
-
-    private fun applySurfaceDimensions() {
-        if (state >= State.CLEANUP) return
-        if (surfaceHeight != -1 && surfaceWidth != -1 && surfaceView != null) {
-            surfaceView?.holder?.setFixedSize(surfaceWidth, surfaceHeight)
-        }
+        ensureUi { safe { mpv.detachSurface() } }
     }
 
     fun setSurfaceWidth(width: Int) {
@@ -240,28 +166,64 @@ class LibmpvWrapper(private val applicationContext: Context) {
         applySurfaceDimensions()
     }
 
-    fun cleanup() {
-        if (!created || cleaning || state >= State.CLEANUP) return
-        cleaning = true
-        state = State.CLEANUP
-
-        onMpvThread {
-            runCatching { mpv.command(arrayOf("stop")) }
-            runCatching { mpv.setPropertyString("pause", "yes") }
-            runCatching { mpv.detachSurface() }
-            runCatching { mpv.removeObservers() }
-            runCatching { mpv.removeLogObservers() }
-            runCatching { mpv.destroy() }
-            created = false
-            cleaning = false
-            isDestroyed = true
-            destroying = false
-            mainHandler.post {
-                try { mpvExec.shutdown() } catch (_: Throwable) {}
-            }
-            state = State.DESTROYED
+    private fun applySurfaceDimensions() {
+        ensureUi {
+            try {
+                if (surfaceWidth > 0 && surfaceHeight > 0 && surfaceView != null) {
+                    surfaceView?.holder?.setFixedSize(surfaceWidth, surfaceHeight)
+                }
+            } catch (e: Exception) { logException(e) }
         }
     }
 
-    fun destroy() = cleanup()
+    fun play(url: String, options: String? = null) {
+        ensureUi {
+            safe {
+                if (!isPlaying) {
+                    if (options == null)
+                        mpv.command(arrayOf("loadfile", url))
+                    else
+                        mpv.command(arrayOf("loadfile", url, "replace", "0", options))
+                    mpv.command(arrayOf("set", "pause", "no"))
+                    hasPlayedOnce = true
+                    isPlaying = true
+                }
+            }
+        }
+    }
+
+    fun pause() {
+        ensureUi { safe { mpv.command(arrayOf("set", "pause", "yes")); isPlaying = false } }
+    }
+
+    fun unpause() {
+        ensureUi { safe { mpv.command(arrayOf("set", "pause", "no")); isPlaying = true } }
+    }
+
+    fun pauseOrUnpause() {
+        ensureUi { if (isPlaying) pause() else unpause() }
+    }
+
+    fun seekToSeconds(seconds: Int) {
+        ensureUi { safe { mpv.command(arrayOf("seek", seconds.toString(), "absolute")) } }
+    }
+
+    private fun createMpvDirectory() {
+        val dir = File(applicationContext.getExternalFilesDir("mpv"), "mpv")
+        try {
+            mpvDirectory = dir.absolutePath
+            if (!dir.exists() && !dir.mkdirs()) {
+                Log.e(TAG, "Unable to create $dir")
+                return
+            }
+            applicationContext.assets.open("subfont.ttf").use { inp ->
+                FileOutputStream("${dir}/subfont.ttf").use { out -> inp.copyTo(out) }
+            }
+            applicationContext.assets.open("mpv.conf").use { inp ->
+                FileOutputStream("${dir}/mpv.conf").use { out -> inp.copyTo(out) }
+            }
+        } catch (e: Exception) {
+            logException(e)
+        }
+    }
 }
