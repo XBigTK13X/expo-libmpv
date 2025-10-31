@@ -106,6 +106,14 @@ class LibmpvWrapper(private val applicationContext: Context) {
                 mpv.removeObservers()
                 eventObserver = observer
                 mpv.addObserver(observer)
+                mpv.observeProperty("demuxer-cache-time", MPVLib.MPV_FORMAT_INT64)
+                mpv.observeProperty("duration", MPVLib.MPV_FORMAT_INT64)
+                mpv.observeProperty("eof-reached", MPVLib.MPV_FORMAT_FLAG)
+                mpv.observeProperty("paused-for-cache", MPVLib.MPV_FORMAT_FLAG)
+                mpv.observeProperty("seekable", MPVLib.MPV_FORMAT_FLAG)
+                mpv.observeProperty("speed", MPVLib.MPV_FORMAT_DOUBLE)
+                mpv.observeProperty("time-pos", MPVLib.MPV_FORMAT_INT64)
+                mpv.observeProperty("track-list", MPVLib.MPV_FORMAT_STRING)
             }
         }
     }
