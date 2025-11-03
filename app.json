@@ -1,6 +1,6 @@
 {
     "expo": {
-        "runtimeVersion": "0.3.4",
+        "runtimeVersion": "0.3.5",
         "plugins": [
             [
                 "expo-build-properties",

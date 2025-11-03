@@ -125,10 +125,6 @@ class LibmpvView(context: Context, appContext: AppContext) :
     mpv.setOptionString("opengl-es", "yes")
     mpv.setOptionString("video-sync", "audio")
 
-    mpv.setOptionString("audio-samplerate","48000")
-    mpv.setOptionString("audio-format","float")
-    mpv.setOptionString("audio-buffer","2.0")
-
     mpv.setOptionString("ao", "audiotrack")
     mpv.setOptionString("alang", "")
 
