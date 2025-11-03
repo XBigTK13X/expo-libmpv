@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { findNodeHandle } from 'react-native'
 import { View, Pressable, Modal, TouchableOpacity, AppState, Text } from 'react-native';
-import Libmpv from 'expo-libmpv';
+import LibmpvView from 'expo-libmpv';
 
 const circularReplacer = () => {
   const seen = new WeakSet();
@@ -90,8 +90,10 @@ function LandingPage({ setPage }) {
 
 function VideoPage({ setPage }) {
   const [isPlaying, setIsPlaying] = React.useState(true);
-  const [seekSeconds, setSeekSeconds] = React.useState(0)
   const [loadError, setError] = React.useState('')
+  const [seekSeconds, setSeekSeconds] = React.useState(0)
+  const [subScale, setSubScale] = React.useState(1.0)
+
   const nativeRef = React.useRef(null);
 
   React.useEffect(() => {
@@ -106,6 +108,10 @@ function VideoPage({ setPage }) {
       appStateSubscription.remove();
     };
   }, []);
+
+  React.useEffect(() => {
+    nativeRef.current.runCommand(`set|sub-scale|${subScale}`)
+  }, [subScale])
 
   if (loadError) {
     return <Text>{loadError}</Text>
@@ -144,12 +150,7 @@ function VideoPage({ setPage }) {
     setIsPlaying(!isPlaying)
     if (nativeRef.current) {
       console.log("=-=-=-=-=-=-=- Running command =-=-=-=-=-=-")
-      const handle = findNodeHandle(nativeRef.current);
-      let currentSize = await Libmpv.Module.getProperty(handle, 'sub-scale');
-      if (currentSize !== null) {
-        currentSize = parseFloat(currentSize)
-        nativeRef.current.runCommand(`set|sub-scale|${currentSize + .1}`)
-      }
+      setSubScale((prev) => { return prev + 0.1 });
     }
   }
 
@@ -162,7 +163,7 @@ function VideoPage({ setPage }) {
         transparent
         style={styles.video}
         onPress={onPress} >
-        <Libmpv.View
+        <LibmpvView
           ref={nativeRef}
           isPlaying={isPlaying}
           playUrl={videoUrl}

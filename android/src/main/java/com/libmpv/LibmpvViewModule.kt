@@ -87,8 +87,6 @@ class LibmpvViewModule : Module() {
         Prop("seekToSeconds") { view: LibmpvView, seconds: Int ->
             if (view.isSurfaceReady()) {
                 view.mpv.seekToSeconds(seconds)
-            } else {
-                view.seekToSeconds = seconds
             }
             view.log("seekToSeconds", "$seconds")
         }

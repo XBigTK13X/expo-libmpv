@@ -4,7 +4,6 @@
   ],
   "android": {
     "modules": [
-      "com.libmpv.LibmpvModule",
       "com.libmpv.LibmpvViewModule"
     ]
   }

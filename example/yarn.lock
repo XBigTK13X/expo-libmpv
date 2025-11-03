@@ -2317,10 +2317,18 @@ expo-asset@~12.0.7:
     "@expo/image-utils" "^0.8.6"
     expo-constants "~18.0.7"
 
-expo-build-properties@1.0.7, expo-build-properties@~1.0.7:
+expo-build-properties@1.0.7:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/expo-build-properties/-/expo-build-properties-1.0.7.tgz#27384a7614b31db1097e0572dfd2f46d913f248f"
   integrity sha512-HbsLEjhmVaGudNpO3qYSdZddK+B82D0ff5r9hZ1huOGqwPnb21TmajsSjHC0q7M+9MJ2P+IunC4qYib21IWSAg==
+  dependencies:
+    ajv "^8.11.0"
+    semver "^7.6.0"
+
+expo-build-properties@1.0.9:
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/expo-build-properties/-/expo-build-properties-1.0.9.tgz#71f0ce813a8431937a3db25a91f1bb4b1a6214ae"
+  integrity sha512-2icttCy3OPTk/GWIFt+vwA+0hup53jnmYb7JKRbvNvrrOrz+WblzpeoiaOleI2dYG/vjwpNO8to8qVyKhYJtrQ==
   dependencies:
     ajv "^8.11.0"
     semver "^7.6.0"
@@ -2351,9 +2359,9 @@ expo-keep-awake@~15.0.6:
   integrity sha512-xO/KbQQjSdhHR87x2uZsMnIDXsDO9apa64jqxG5t0WKSBujdS3uDmvuYF7EwiJc8fKEWZ500Co51nOtO0wU1dg==
 
 expo-libmpv@../:
-  version "0.1.2"
+  version "0.3.3"
   dependencies:
-    expo-build-properties "~1.0.7"
+    expo-build-properties "1.0.9"
 
 expo-modules-autolinking@3.0.8:
   version "3.0.8"
