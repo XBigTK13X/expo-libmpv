@@ -13,12 +13,11 @@ import java.io.OutputStream
 
 class LibmpvWrapper(private val applicationContext: Context) {
     companion object {
-        private const val TAG = "react-native-libmpv"
+        private const val TAG = "expo-libmpv"
         private var SWALLOW = true
     }
 
     @Volatile private var created = false
-    @Volatile private var destroying = false
     @Volatile private var destroyed = false
     @Volatile private var cleaning = false
     @Volatile private var isPlaying = false
@@ -30,7 +29,7 @@ class LibmpvWrapper(private val applicationContext: Context) {
     private var surfaceWidth: Int = -1
     private var surfaceHeight: Int = -1
     private var surfaceView: SurfaceView? = null
-    private val mpv: MPVLib = MPVLib()
+    private val mpv: MPVLib = MPVLib(true)
 
     fun isCreated(): Boolean = created
     fun isPlaying(): Boolean = isPlaying
