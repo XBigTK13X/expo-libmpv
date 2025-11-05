@@ -253,7 +253,7 @@ class LibmpvWrapper(private val applicationContext: Context) {
     fun detachSurface(){
         if(destroyed) { return }
         try{
-            mpv.detachSurface()
+            mpv.detachSurfaceAsync()
         }
         catch(e:Exception){
             logException(e)
@@ -281,7 +281,7 @@ class LibmpvWrapper(private val applicationContext: Context) {
             Handler(Looper.getMainLooper()).post {
                 mpv.removeObservers()
                 mpv.removeLogObservers()
-                mpv.destroy()
+                mpv.destroyAsync()
                 created = false
                 cleaning = false
             }
