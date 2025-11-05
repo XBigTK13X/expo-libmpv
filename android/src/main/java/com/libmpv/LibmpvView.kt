@@ -123,7 +123,7 @@ class LibmpvView(context: Context, appContext: AppContext) :
 
     mpv.setOptionString("gpu-context", "android")
     mpv.setOptionString("opengl-es", "yes")
-    mpv.setOptionString("video-sync", "audio")
+    mpv.setOptionString("video-sync", "display-resample")
 
     mpv.setOptionString("ao", "audiotrack")
     mpv.setOptionString("alang", "")
