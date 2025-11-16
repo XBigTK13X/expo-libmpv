@@ -36,7 +36,7 @@ if (useManagedAndroidSdkVersions) {
 }
 
 dependencies {
-  implementation "com.libmpv:android-libmpv:0.6.5"
+  implementation "com.libmpv:android-libmpv:0.7.0"
 }
 
 android {

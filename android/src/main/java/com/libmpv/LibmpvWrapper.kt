@@ -23,13 +23,10 @@ class LibmpvWrapper(private val applicationContext: Context) {
     @Volatile private var isPlaying = false
     @Volatile private var hasPlayedOnce = false
 
-    private var eventObserver: MPVLib.EventObserver? = null
-    private var logObserver: MPVLib.LogObserver? = null
     private var mpvDirectory: String? = null
     private var surfaceWidth: Int = -1
     private var surfaceHeight: Int = -1
     private var surfaceView: SurfaceView? = null
-    private val mpv: MPVLib = MPVLib(true)
 
     fun isCreated(): Boolean = created
     fun isPlaying(): Boolean = isPlaying
@@ -40,7 +37,7 @@ class LibmpvWrapper(private val applicationContext: Context) {
         if (destroyed){ return }
         try {
             val message: String = (exception.message as? String) ?: "Unable to read error message"
-            logObserver?.logMessage("RNLE", 20, message)
+            MPVLib.logMessage("RNLE", 20, message)
         } catch (e: Exception) {
             if (!SWALLOW){
                 throw e
@@ -50,7 +47,7 @@ class LibmpvWrapper(private val applicationContext: Context) {
 
     fun createManagedInstance(): Boolean {
         try{
-            mpv.create(applicationContext)
+            MPVLib.create(applicationContext)
             createMpvDirectory()
             created = true
             return true
@@ -62,7 +59,7 @@ class LibmpvWrapper(private val applicationContext: Context) {
     fun initNativeBinding() {
         if (destroyed || !created){ return }
         try {
-            mpv.init()
+            MPVLib.init()
         } catch (e: Exception) {
             logException(e)
             if (!SWALLOW){
@@ -104,17 +101,16 @@ class LibmpvWrapper(private val applicationContext: Context) {
     fun addEventObserver(observer: MPVLib.EventObserver) {
         if (destroyed || !created){ return }
         try {
-            mpv.removeObservers()
-            eventObserver = observer
-            mpv.addObserver(eventObserver)
-            mpv.observeProperty("demuxer-cache-time", MPVLib.MPV_FORMAT_INT64)
-            mpv.observeProperty("duration", MPVLib.MPV_FORMAT_INT64)
-            mpv.observeProperty("eof-reached", MPVLib.MPV_FORMAT_FLAG)
-            mpv.observeProperty("paused-for-cache", MPVLib.MPV_FORMAT_FLAG)
-            mpv.observeProperty("seekable", MPVLib.MPV_FORMAT_FLAG)
-            mpv.observeProperty("speed", MPVLib.MPV_FORMAT_DOUBLE)
-            mpv.observeProperty("time-pos", MPVLib.MPV_FORMAT_INT64)
-            mpv.observeProperty("track-list", MPVLib.MPV_FORMAT_STRING)
+            MPVLib.removeObservers()
+            MPVLib.addObserver(observer)
+            MPVLib.observeProperty("demuxer-cache-time", MPVLib.MpvFormat.MPV_FORMAT_INT64)
+            MPVLib.observeProperty("duration", MPVLib.MpvFormat.MPV_FORMAT_INT64)
+            MPVLib.observeProperty("eof-reached", MPVLib.MpvFormat.MPV_FORMAT_FLAG)
+            MPVLib.observeProperty("paused-for-cache", MPVLib.MpvFormat.MPV_FORMAT_FLAG)
+            MPVLib.observeProperty("seekable", MPVLib.MpvFormat.MPV_FORMAT_FLAG)
+            MPVLib.observeProperty("speed", MPVLib.MpvFormat.MPV_FORMAT_DOUBLE)
+            MPVLib.observeProperty("time-pos", MPVLib.MpvFormat.MPV_FORMAT_INT64)
+            MPVLib.observeProperty("track-list", MPVLib.MpvFormat.MPV_FORMAT_STRING)
         } catch (e: Exception) {
             logException(e)
             if (!SWALLOW){
@@ -126,9 +122,8 @@ class LibmpvWrapper(private val applicationContext: Context) {
     fun addLogObserver(observer: MPVLib.LogObserver) {
         if (destroyed || !created){ return }
         try {
-            mpv.removeLogObservers()
-            logObserver = observer
-            mpv.addLogObserver(logObserver)
+            MPVLib.removeLogObservers()
+            MPVLib.addLogObserver(observer)
         } catch (e: Exception) {
             logException(e)
             if (!SWALLOW) {
@@ -140,7 +135,7 @@ class LibmpvWrapper(private val applicationContext: Context) {
     fun setOptionString(option: String, setting: String) {
         if (destroyed || !created){ return }
         try {
-            mpv.setOptionString(option, setting)
+            MPVLib.setOptionString(option, setting)
         } catch (e: Exception) {
             logException(e)
             if (!SWALLOW){
@@ -152,7 +147,7 @@ class LibmpvWrapper(private val applicationContext: Context) {
     fun setPropertyString(property: String, setting: String) {
         if (destroyed || !created){ return }
         try {
-            mpv.setPropertyString(property, setting)
+            MPVLib.setPropertyString(property, setting)
         } catch (e: Exception) {
             logException(e)
             if (!SWALLOW){
@@ -164,7 +159,7 @@ class LibmpvWrapper(private val applicationContext: Context) {
     fun command(orders: Array<String>) {
         if (destroyed || !created){ return }
         try {
-            mpv.command(orders)
+            MPVLib.command(orders)
         } catch (e: Exception) {
             logException(e)
             if (!SWALLOW){
@@ -178,7 +173,7 @@ class LibmpvWrapper(private val applicationContext: Context) {
         try {
             this.surfaceView = surfaceView
             applySurfaceDimensions()
-            mpv.attachSurface(surfaceView.holder.surface)
+            MPVLib.attachSurface(surfaceView.holder.surface)
         } catch (e: Exception) {
             logException(e)
             if (!SWALLOW){
@@ -253,7 +248,7 @@ class LibmpvWrapper(private val applicationContext: Context) {
     fun detachSurface(){
         if(destroyed) { return }
         try{
-            mpv.detachSurfaceAsync()
+            MPVLib.detachSurface()
         }
         catch(e:Exception){
             logException(e)
@@ -279,9 +274,9 @@ class LibmpvWrapper(private val applicationContext: Context) {
             setPropertyString("ao", "null")
             detachSurface()
             Handler(Looper.getMainLooper()).post {
-                mpv.removeObservers()
-                mpv.removeLogObservers()
-                mpv.destroyAsync()
+                MPVLib.removeObservers()
+                MPVLib.removeLogObservers()
+                MPVLib.destroy()
                 created = false
                 cleaning = false
             }
