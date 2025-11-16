@@ -18,6 +18,7 @@ class LibmpvWrapper(private val applicationContext: Context) {
     }
 
     @Volatile private var created = false
+    @Volatile private var inited = false
     @Volatile private var destroyed = false
     @Volatile private var cleaning = false
     @Volatile private var isPlaying = false
@@ -46,6 +47,7 @@ class LibmpvWrapper(private val applicationContext: Context) {
     }
 
     fun createManagedInstance(): Boolean {
+        if(isCreated){ return }
         try{
             MPVLib.create(applicationContext)
             createMpvDirectory()
@@ -57,9 +59,10 @@ class LibmpvWrapper(private val applicationContext: Context) {
     }
 
     fun initNativeBinding() {
-        if (destroyed || !created){ return }
+        if (destroyed || !created || inited){ return }
         try {
             MPVLib.init()
+            inited = true
         } catch (e: Exception) {
             logException(e)
             if (!SWALLOW){
