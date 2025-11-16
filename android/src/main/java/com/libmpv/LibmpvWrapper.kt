@@ -47,7 +47,7 @@ class LibmpvWrapper(private val applicationContext: Context) {
     }
 
     fun createManagedInstance(): Boolean {
-        if(isCreated){ return }
+        if(created){ return false }
         try{
             MPVLib.create(applicationContext)
             createMpvDirectory()
