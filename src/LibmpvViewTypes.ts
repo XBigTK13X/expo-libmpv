@@ -1,6 +1,7 @@
 export type LibmpvViewProps = {
   ref: any,
   style: any,
+  videoOutput: string,
   playUrl: string,
   isPlaying: boolean,
   useHardwareDecoder: boolean,

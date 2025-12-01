@@ -77,6 +77,7 @@ export const LibmpvView = React.forwardRef<LibmpvViewNativeMethods, LibmpvViewPr
   return <LibmpvViewNative
     ref={parentRef}
     style={props.surfaceStyle ? props.surfaceStyle : styles.videoPlayer}
+    videoOutput={props.videoOutput}
     playUrl={props.playUrl}
     isPlaying={props.isPlaying}
     useHardwareDecoder={props.useHardwareDecoder}

@@ -22,6 +22,13 @@ class LibmpvViewModule : Module() {
             view.cleanup()
         }
 
+        Prop("videoOutput") { view: LibmpvView, videoOutput: String ->
+            view.videoOutput = videoOutput
+            view.setVideoOutput(videoOutput)
+            view.attemptCreation()
+            view.log("setVideoOutput", videoOutput)
+        }
+
         Prop("playUrl") { view: LibmpvView, playUrl: String ->
             view.playUrl = playUrl
             if (view.isSurfaceReady()) {

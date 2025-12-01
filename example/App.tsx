@@ -165,6 +165,7 @@ function VideoPage({ setPage }) {
         onPress={onPress} >
         <LibmpvView
           ref={nativeRef}
+          videoOutput="gpu"
           isPlaying={isPlaying}
           playUrl={videoUrl}
           useHardwareDecoder={true}

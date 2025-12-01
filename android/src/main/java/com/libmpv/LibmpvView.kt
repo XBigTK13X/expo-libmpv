@@ -38,6 +38,7 @@ class LibmpvView(context: Context, appContext: AppContext) :
   var audioIndex: Int? = null
   var subtitleIndex: Int? = null
   var useHardwareDecoder: Boolean? = null
+  var videoOutput: String? = null
 
   init {
     surfaceView.holder.addCallback(this)
@@ -69,7 +70,8 @@ class LibmpvView(context: Context, appContext: AppContext) :
                             surfaceHeight != null &&
                             audioIndex != null &&
                             subtitleIndex != null &&
-                            useHardwareDecoder != null
+                            useHardwareDecoder != null &&
+                            videoOutput != null
 
         if (allPropsReady) {
             log("LibmpvView.attemptCreation", "Initializing MPV instance")
@@ -112,7 +114,8 @@ class LibmpvView(context: Context, appContext: AppContext) :
     mpv.setOptionString("msg-level", "all=no")
 
     mpv.setOptionString("profile", "fast")
-    mpv.setOptionString("vo", "gpu-next")
+
+    videoOutput?.let { mpv.setOptionString("vo", it) }
 
     if (useHardwareDecoder == true) {
       mpv.setOptionString("hwdec", HARDWARE_OPTIONS)
