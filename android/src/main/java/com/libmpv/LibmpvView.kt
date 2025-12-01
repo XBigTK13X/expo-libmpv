@@ -123,7 +123,15 @@ class LibmpvView(context: Context, appContext: AppContext) :
 
     mpv.setOptionString("gpu-context", "android")
     mpv.setOptionString("opengl-es", "yes")
-    mpv.setOptionString("video-sync", "display-resample")
+
+    // Nearly all of this block is to prevent choppy playback on Google streaming devices
+    mpv.setOptionString("video-sync", "audio")
+    mpv.setOptionString("audio-pitch-correction","yes")
+    mpv.setOptionString("scale", "bilinear")
+    mpv.setOptionString("dscale", "bilinear")
+    mpv.setOptionString("interpolation","no")
+    mpv.setOptionString("tscale","off")
+    mpv.setOptionString("correct-pts","yes")
 
     mpv.setOptionString("ao", "audiotrack")
     mpv.setOptionString("alang", "")
@@ -135,8 +143,6 @@ class LibmpvView(context: Context, appContext: AppContext) :
 
     mpv.setOptionString("cache", "yes")
     mpv.setOptionString("cache-pause-initial", "yes")
-    mpv.setOptionString("cache-secs", "5")
-    mpv.setOptionString("demuxer-readahead-secs", "5")
   }
 
   fun log(method: String, argument: String) {
@@ -179,12 +185,9 @@ class LibmpvView(context: Context, appContext: AppContext) :
     val width = surfaceWidth ?: 0
     val height = surfaceHeight ?: 0
 
-    // In the new Fabric version, this is stretching the content
-    //holder.setFixedSize(width, height)
-    //mpv.setPropertyString("android-surface-size", "${width}x${height}")
-
     mpv.attachSurface(surfaceView)
     prepareMpvPlayback()
+    mpv.setOptionString("vf", "scale=${width}:${height}")
     isSurfaceCreated = true
     log("LibmpvView.surfaceCreated", "Surface created and MPV should be playing")
   }

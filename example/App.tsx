@@ -21,7 +21,7 @@ const DEBUG_EVENTS = false
 const TRACK_DISABLED = -1;
 const FIVE_MINUTES = 300;
 
-const animeUrl = 'http://juggernaut.9914.us/tv/anime/precure/Star ☆ Twinkle Precure/Season 1/S01E006 - An Imagination of Darkness! The Dark Pen Appears!.mkv'
+const animeUrl = 'http://juggernaut.9914.us/tv/anime/collection/precure/Star ☆ Twinkle Precure/Season 1/S01E006 - An Imagination of Darkness! The Dark Pen Appears!.mkv'
 const cartoonSubbedUrl = 'http://juggernaut.9914.us/tv/cartoon/k/King of the Hill/Season 14/S14E003 - Chore Money, Chore Problems.mkv'
 const videoUrl = animeUrl;
 let audioTrack = 0
