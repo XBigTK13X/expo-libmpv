@@ -24,7 +24,6 @@ class LibmpvViewModule : Module() {
 
         Prop("videoOutput") { view: LibmpvView, videoOutput: String ->
             view.videoOutput = videoOutput
-            view.setVideoOutput(videoOutput)
             view.attemptCreation()
             view.log("setVideoOutput", videoOutput)
         }
