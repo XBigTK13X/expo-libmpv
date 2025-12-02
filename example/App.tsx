@@ -16,7 +16,7 @@ const circularReplacer = () => {
   };
 };
 
-const DEBUG_EVENTS = false
+const DEBUG_EVENTS = true
 
 const TRACK_DISABLED = -1;
 const FIVE_MINUTES = 300;
