@@ -34,6 +34,10 @@ const EVENT_LOOKUP: any = {
 
 const LibmpvViewNative: React.ComponentType<LibmpvViewProps> = requireNativeView('LibmpvView');
 
+export const DEFAULT_DECODING_MODE: string = "mediacodec-copy"
+
+export const DEFAULT_ACCELERATED_CODECS: string = "h264,hevc,mpeg4,mpeg2video,vp8,vp9,av1"
+
 export const LibmpvView = React.forwardRef<LibmpvViewNativeMethods, LibmpvViewProps>((props: any, parentRef: any) => {
   React.useEffect(() => {
     return () => {
@@ -80,7 +84,8 @@ export const LibmpvView = React.forwardRef<LibmpvViewNativeMethods, LibmpvViewPr
     videoOutput={props.videoOutput}
     playUrl={props.playUrl}
     isPlaying={props.isPlaying}
-    useHardwareDecoder={props.useHardwareDecoder}
+    decodingMode={props.decodingMode}
+    acceleratedCodecs={props.acceleratedCodecs}
     surfaceWidth={props.surfaceWidth}
     surfaceHeight={props.surfaceHeight}
     selectedAudioTrack={props.selectedAudioTrack}

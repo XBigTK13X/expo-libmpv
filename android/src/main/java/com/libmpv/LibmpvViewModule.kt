@@ -38,14 +38,16 @@ class LibmpvViewModule : Module() {
             view.log("setPlayUrl", playUrl)
         }
 
-        Prop("useHardwareDecoder") { view: LibmpvView, useHardwareDecoder: Boolean ->
-            view.useHardwareDecoder = useHardwareDecoder
-            if (view.isSurfaceReady()) {
-                view.setHardwareDecoder(useHardwareDecoder)
-            } else {
-                view.attemptCreation()
-            }
-            view.log("setUseHardwareDecoder", "$useHardwareDecoder")
+        Prop("decodingMode") { view: LibmpvView, decodingMode: String ->
+            view.decodingMode = decodingMode
+            view.attemptCreation()
+            view.log("setDecodingMode", "$decodingMode")
+        }
+
+        Prop("acceleratedCodecs") { view: LibmpvView, acceleratedCodecs: String ->
+            view.acceleratedCodecs = acceleratedCodecs
+            view.attemptCreation()
+            view.log("setAcceleratedCodecs", "$acceleratedCodecs")
         }
 
         Prop("surfaceWidth") { view: LibmpvView, surfaceWidth: Int ->

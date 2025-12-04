@@ -19,11 +19,6 @@ class LibmpvView(context: Context, appContext: AppContext) :
   MPVLib.LogObserver,
   MPVLib.EventObserver {
 
-  companion object {
-    const val HARDWARE_OPTIONS = "mediacodec-copy"
-    const val ACCELERATED_CODECS = "h264,hevc,mpeg4,mpeg2video,vp8,vp9,av1"
-  }
-
   private val onLibmpvLog by EventDispatcher()
   private val onLibmpvEvent by EventDispatcher()
 
@@ -37,8 +32,9 @@ class LibmpvView(context: Context, appContext: AppContext) :
   var surfaceHeight: Int? = null
   var audioIndex: Int? = null
   var subtitleIndex: Int? = null
-  var useHardwareDecoder: Boolean? = null
   var videoOutput: String? = null
+  var decodingMode: String? = null
+  var acceleratedCodecs: String? = null
 
   init {
     surfaceView.holder.addCallback(this)
@@ -65,13 +61,16 @@ class LibmpvView(context: Context, appContext: AppContext) :
   }
 
   fun attemptCreation(){
-        val allPropsReady = playUrl != null &&
-                            surfaceWidth != null &&
-                            surfaceHeight != null &&
-                            audioIndex != null &&
-                            subtitleIndex != null &&
-                            useHardwareDecoder != null &&
-                            videoOutput != null
+        val allPropsReady =
+          playUrl != null &&
+          surfaceWidth != null &&
+          surfaceHeight != null &&
+          audioIndex != null &&
+          subtitleIndex != null &&
+          videoOutput != null &&
+          decodingMode != null &&
+          acceleratedCodecs != null
+
 
         if (allPropsReady) {
             log("LibmpvView.attemptCreation", "Initializing MPV instance")
@@ -115,13 +114,15 @@ class LibmpvView(context: Context, appContext: AppContext) :
 
     mpv.setOptionString("profile", "fast")
 
-    videoOutput?.let { mpv.setOptionString("vo", it) }
+    videoOutput?.let { vo -> mpv.setOptionString("vo", vo) }
 
-    if (useHardwareDecoder == true) {
-      mpv.setOptionString("hwdec", HARDWARE_OPTIONS)
-      mpv.setOptionString("hwdec-codecs", ACCELERATED_CODECS)
-    } else {
-      mpv.setOptionString("hwdec", "no")
+    decodingMode?.let { mode ->
+      acceleratedCodecs?.let { codecs ->
+        mpv.setOptionString("hwdec", mode)
+        if (decodingMode != "no"){
+          mpv.setOptionString("hwdec-codecs", codecs)
+        }
+      }
     }
 
     mpv.setOptionString("gpu-context", "android")
@@ -171,16 +172,6 @@ class LibmpvView(context: Context, appContext: AppContext) :
     }
     val url: String = (playUrl as? String) ?: ""
     mpv.play(url, options)
-  }
-
-  fun setHardwareDecoder(useHardware: Boolean) {
-    useHardwareDecoder = useHardware
-    if (useHardwareDecoder == true) {
-      mpv.setOptionString("hwdec", HARDWARE_OPTIONS)
-      mpv.setOptionString("hwdec-codecs", ACCELERATED_CODECS)
-    } else {
-      mpv.setOptionString("hwdec", "no")
-    }
   }
 
   // SurfaceHolder.Callback
