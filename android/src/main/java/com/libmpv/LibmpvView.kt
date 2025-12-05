@@ -112,8 +112,6 @@ class LibmpvView(context: Context, appContext: AppContext) :
     mpv.setOptionString("ytdl", "no")
     mpv.setOptionString("msg-level", "all=no")
 
-    mpv.setOptionString("profile", "fast")
-
     videoOutput?.let { vo -> mpv.setOptionString("vo", vo) }
 
     decodingMode?.let { mode ->
@@ -147,6 +145,8 @@ class LibmpvView(context: Context, appContext: AppContext) :
 
     mpv.setOptionString("cache", "yes")
     mpv.setOptionString("cache-pause-initial", "yes")
+    mpv.setOptionString("audio-buffer","0.5")
+    mpv.setOptionString("autosync", "0")
   }
 
   fun log(method: String, argument: String) {
