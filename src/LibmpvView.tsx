@@ -75,11 +75,18 @@ export const LibmpvView = React.forwardRef<LibmpvViewNativeMethods, LibmpvViewPr
     }
   }
 
+  let seekProps: any = {}
+  if (typeof props?.seekToSeconds === 'number' && props?.seekToSeconds > 0) {
+    seekProps.seekToSeconds = props.seekToSeconds
+  }
+
   // The order props are handled in the native code is non-deterministic
   // Each native prop setter checks to see if all required props are set
   // Only then will it try to create an instance of mpv
+
   return <LibmpvViewNative
     ref={parentRef}
+    {...seekProps}
     style={props.surfaceStyle ? props.surfaceStyle : styles.videoPlayer}
     videoOutput={props.videoOutput}
     playUrl={props.playUrl}
@@ -90,7 +97,6 @@ export const LibmpvView = React.forwardRef<LibmpvViewNativeMethods, LibmpvViewPr
     surfaceHeight={props.surfaceHeight}
     selectedAudioTrack={props.selectedAudioTrack}
     selectedSubtitleTrack={props.selectedSubtitleTrack}
-    seekToSeconds={props.seekToSeconds}
     onLibmpvEvent={onLogEvent}
     onLibmpvLog={onLibmpvLog}
   />

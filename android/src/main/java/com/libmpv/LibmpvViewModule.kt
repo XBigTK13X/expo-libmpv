@@ -8,115 +8,75 @@ class LibmpvViewModule : Module() {
     Name("LibmpvView")
 
     View(LibmpvView::class) {
-        Events("onLibmpvLog", "onLibmpvEvent")
+      Events("onLibmpvLog", "onLibmpvEvent")
 
-        AsyncFunction("runCommand") { view: LibmpvView, orders: String ->
-            view.runCommand(orders)
-        }
+      AsyncFunction("runCommand") { view: LibmpvView, orders: String ->
+        view.runCommand(orders)
+      }
 
-        AsyncFunction("setOptionString") { view: LibmpvView, options: String ->
-            view.setOptionString(options)
-        }
+      AsyncFunction("setOptionString") { view: LibmpvView, options: String ->
+        view.setOptionString(options)
+      }
 
-        AsyncFunction("cleanup") { view: LibmpvView ->
-            view.cleanup()
-        }
+      AsyncFunction("cleanup") { view: LibmpvView ->
+        view.cleanup()
+      }
 
-        Prop("videoOutput") { view: LibmpvView, videoOutput: String ->
-            view.videoOutput = videoOutput
-            view.attemptCreation()
-            view.log("setVideoOutput", videoOutput)
-        }
+      Prop("videoOutput") { view: LibmpvView, value: String ->
+        view.videoOutput = value
+        view.attemptCreation()
+        view.log("setVideoOutput", value)
+      }
 
-        Prop("playUrl") { view: LibmpvView, playUrl: String ->
-            view.playUrl = playUrl
-            if (view.isSurfaceReady()) {
-                view.mpv.play(playUrl)
-            } else {
-                view.attemptCreation()
-            }
-            view.log("setPlayUrl", playUrl)
-        }
+    Prop("playUrl") { view: LibmpvView, value: String ->
+        view.playUrl = value
+        view.seekAppliedForCurrentFile = false
+        view.attemptCreation()
+        view.log("setPlayUrl", value)
+    }
 
-        Prop("decodingMode") { view: LibmpvView, decodingMode: String ->
-            view.decodingMode = decodingMode
-            view.attemptCreation()
-            view.log("setDecodingMode", "$decodingMode")
-        }
+      Prop("decodingMode") { view: LibmpvView, value: String ->
+        view.decodingMode = value
+        view.attemptCreation()
+        view.log("setDecodingMode", value)
+      }
 
-        Prop("acceleratedCodecs") { view: LibmpvView, acceleratedCodecs: String ->
-            view.acceleratedCodecs = acceleratedCodecs
-            view.attemptCreation()
-            view.log("setAcceleratedCodecs", "$acceleratedCodecs")
-        }
+      Prop("acceleratedCodecs") { view: LibmpvView, value: String ->
+        view.acceleratedCodecs = value
+        view.attemptCreation()
+        view.log("setAcceleratedCodecs", value)
+      }
 
-        Prop("surfaceWidth") { view: LibmpvView, surfaceWidth: Int ->
-            view.surfaceWidth = surfaceWidth
-            if (view.isSurfaceReady()) {
-                view.mpv.setSurfaceWidth(surfaceWidth)
-            } else {
-                view.attemptCreation()
-            }
-            view.log("setSurfaceWidth", "$surfaceWidth")
-        }
+      Prop("surfaceWidth") { view: LibmpvView, value: Int ->
+        view.surfaceWidth = value
+        view.attemptCreation()
+        view.log("setSurfaceWidth", "$value")
+      }
 
-        Prop("surfaceHeight") { view: LibmpvView, surfaceHeight: Int ->
-            view.surfaceHeight = surfaceHeight
-            if (view.isSurfaceReady()) {
-                view.mpv.setSurfaceHeight(surfaceHeight)
-            } else {
-                view.attemptCreation()
-            }
-            view.log("setSurfaceHeight", "$surfaceHeight")
-        }
+      Prop("surfaceHeight") { view: LibmpvView, value: Int ->
+        view.surfaceHeight = value
+        view.attemptCreation()
+        view.log("setSurfaceHeight", "$value")
+      }
 
-        Prop("selectedAudioTrack") { view: LibmpvView, audioTrackIndex: Int ->
-            view.audioIndex = audioTrackIndex
-            if (view.isSurfaceReady()) {
-                val mpvIndex = if (audioTrackIndex != -1) (audioTrackIndex + 1).toString() else "no"
-                view.mpv.setOptionString("aid", mpvIndex)
-            } else {
-                view.attemptCreation()
-            }
-            view.log("selectAudioTrack", "$audioTrackIndex")
-        }
+      Prop("selectedAudioTrack") { view: LibmpvView, index: Int ->
+        view.selectAudioTrack(index)
+        view.log("selectAudioTrack", "$index")
+      }
 
-        Prop("selectedSubtitleTrack") { view: LibmpvView, subtitleTrackIndex: Int ->
-            view.subtitleIndex = subtitleTrackIndex
-            if (view.isSurfaceReady()) {
-                val mpvIndex = if (subtitleTrackIndex != -1) (subtitleTrackIndex + 1).toString() else "no"
-                view.mpv.setOptionString("sid", mpvIndex)
-            } else {
-                view.attemptCreation()
-            }
-            view.log("selectSubtitleTrack", "$subtitleTrackIndex")
-        }
+      Prop("selectedSubtitleTrack") { view: LibmpvView, index: Int ->
+        view.selectSubtitleTrack(index)
+        view.log("selectSubtitleTrack", "$index")
+      }
 
-        Prop("seekToSeconds") { view: LibmpvView, seconds: Int ->
-            if (view.isSurfaceReady()) {
-                view.mpv.seekToSeconds(seconds)
-            }
-            view.log("seekToSeconds", "$seconds")
-        }
+      Prop("seekToSeconds") { view: LibmpvView, seconds: Double ->
+        view.setSeekToSeconds(seconds)
+        view.log("seekToSeconds", "$seconds")
+      }
 
-        Prop("isPlaying") { view: LibmpvView, isPlaying: Boolean ->
-            if (view.isSurfaceReady() && view.mpv.hasPlayedOnce()) {
-                when {
-                    isPlaying && !view.mpv.isPlaying() -> {
-                        view.mpv.unpause()
-                    }
-                    !isPlaying && view.mpv.isPlaying() -> {
-                        view.mpv.pause()
-                    }
-                }
-            } else {
-                view.attemptCreation()
-            }
-        }
-
-        OnViewDestroys { view: LibmpvView ->
-            view.cleanup()
-        }
+      OnViewDestroys { view: LibmpvView ->
+        view.cleanup()
+      }
     }
   }
 }

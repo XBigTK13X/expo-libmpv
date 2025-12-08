@@ -91,7 +91,7 @@ function LandingPage({ setPage }) {
 function VideoPage({ setPage }) {
   const [isPlaying, setIsPlaying] = React.useState(true);
   const [loadError, setError] = React.useState('')
-  const [seekSeconds, setSeekSeconds] = React.useState(0)
+  const [seekSeconds, setSeekSeconds] = React.useState(FIVE_MINUTES)
   const [subScale, setSubScale] = React.useState(1.0)
 
   const nativeRef = React.useRef(null);
@@ -131,10 +131,6 @@ function VideoPage({ setPage }) {
         console.log("=-=-=-=-=-=-==- NATIVE METHOD =-=-=-=--==-=")
       }
     }
-
-    if (seekSeconds === 0 && libmpvLog.text && libmpvLog.text.indexOf('Starting playback') !== -1) {
-      setSeekSeconds(FIVE_MINUTES)
-    }
     if (libmpvLog.text && libmpvLog.text.indexOf('Opening failed or was aborted') !== -1) {
       setError("Unable to open file.")
     }
@@ -155,6 +151,10 @@ function VideoPage({ setPage }) {
   }
 
   console.log({ videoUrl, DEFAULT_DECODING_MODE, DEFAULT_ACCELERATED_CODECS })
+  const viewKey = React.useMemo(
+    () => `${videoUrl}-${Date.now()}`,
+    []
+  );
   return (
     <Modal style={styles.container} onRequestClose={() => {
       setPage('home')
@@ -165,6 +165,7 @@ function VideoPage({ setPage }) {
         onPress={onPress} >
         <LibmpvView
           ref={nativeRef}
+          key={viewKey}
           videoOutput="gpu"
           isPlaying={isPlaying}
           playUrl={videoUrl}
