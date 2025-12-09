@@ -184,16 +184,66 @@ class LibmpvRenderer(
         if (!mpvAlive || shuttingDown) return
         try {
             MPVLib.setOptionString("force-window", "no")
-            MPVLib.setOptionString("keep-open", "always")
-
-            session.videoOutput?.let { MPVLib.setOptionString("vo", it) }
-
-            val mode = session.decodingMode
-            val codecs = session.acceleratedCodecs
-            if (!mode.isNullOrBlank() && !codecs.isNullOrBlank()) {
-                MPVLib.setOptionString("hwdec", mode)
-                if (mode != "no") MPVLib.setOptionString("hwdec-codecs", codecs)
+            MPVLib.setOptionString("config", "yes")
+            mpvDirectory?.let {
+                MPVLib.setOptionString("config-dir", it)
+                MPVLib.setOptionString("sub-font-dir", it)
             }
+
+            MPVLib.setOptionString("keep-open", "always")
+            MPVLib.setOptionString("save-position-on-quit", "no")
+            MPVLib.setOptionString("ytdl", "no")
+            MPVLib.setOptionString("msg-level", "all=no")
+
+            session.videoOutput?.let { videoOutput ->
+                MPVLib.setOptionString("vo", videoOutput)
+            }
+
+            val decodingMode = session.decodingMode
+            val acceleratedCodecs = session.acceleratedCodecs
+            if (!decodingMode.isNullOrBlank() && !acceleratedCodecs.isNullOrBlank()) {
+                MPVLib.setOptionString("hwdec", decodingMode)
+                if (decodingMode != "no"){
+                    MPVLib.setOptionString("hwdec-codecs", acceleratedCodecs)
+                }
+            }
+
+            MPVLib.setOptionString("gpu-context", "android")
+            MPVLib.setOptionString("opengl-es", "yes")
+
+            val videoSync = session.videoSync
+            if(!videoSync.isNullOrBlank()){
+                if(videoSync == "display-resample"){
+                    MPVLib.setOptionString("video-sync", "display-resample")
+                    MPVLib.setOptionString("audio-pitch-correction","no")
+                    MPVLib.setOptionString("autosync", "1")
+                    MPVLib.setOptionString("correct-pts","no")
+                }
+                if(videoSync == "audio"){
+                    MPVLib.setOptionString("video-sync", "audio")
+                    MPVLib.setOptionString("audio-pitch-correction","yes")
+                    MPVLib.setOptionString("autosync", "0")
+                    MPVLib.setOptionString("correct-pts","yes")
+                }
+            }
+
+            MPVLib.setOptionString("scale", "bilinear")
+            MPVLib.setOptionString("dscale", "bilinear")
+            MPVLib.setOptionString("tscale","off")
+            MPVLib.setOptionString("interpolation","no")
+
+            MPVLib.setOptionString("ao", "audiotrack")
+            MPVLib.setOptionString("alang", "")
+
+            MPVLib.setOptionString("sub-font-provider", "none")
+            MPVLib.setOptionString("slang", "")
+            MPVLib.setOptionString("sub-scale-with-window", "yes")
+            MPVLib.setOptionString("sub-use-margins", "no")
+
+            MPVLib.setOptionString("cache", "yes")
+            MPVLib.setOptionString("cache-pause-initial", "yes")
+            MPVLib.setOptionString("audio-buffer","2.0")
+
         } catch (e: Exception) {
             logException(e)
         }
@@ -309,20 +359,29 @@ class LibmpvRenderer(
 
     private fun createMpvDirectory() {
         if (shuttingDown) return
+
         val ctx = surfaceView.context.applicationContext
         val dir = File(ctx.getExternalFilesDir("mpv"), "mpv")
-        try {
-            mpvDirectory = dir.absolutePath
-            if (!dir.exists() && !dir.mkdirs()) return
 
-            ctx.assets.open("subfont.ttf").use { inS ->
-                FileOutputStream("$dir/subfont.ttf").use { outS ->
-                    inS.copyTo(outS)
+        try {
+            if (!dir.exists() && !dir.mkdirs()) return
+            mpvDirectory = dir.absolutePath
+
+            val subFont = File(dir, "subfont.ttf")
+            if (!subFont.exists()) {
+                ctx.assets.open("subfont.ttf").use { inS ->
+                    FileOutputStream(subFont).use { outS ->
+                        inS.copyTo(outS)
+                    }
                 }
             }
-            ctx.assets.open("mpv.conf").use { inS ->
-                FileOutputStream("$dir/mpv.conf").use { outS ->
-                    inS.copyTo(outS)
+
+            val mpvConf = File(dir, "mpv.conf")
+            if (!mpvConf.exists()) {
+                ctx.assets.open("mpv.conf").use { inS ->
+                    FileOutputStream(mpvConf).use { outS ->
+                        inS.copyTo(outS)
+                    }
                 }
             }
         } catch (e: Exception) {

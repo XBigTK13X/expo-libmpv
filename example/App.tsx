@@ -171,6 +171,7 @@ function VideoPage({ setPage }) {
           playUrl={videoUrl}
           decodingMode={DEFAULT_DECODING_MODE}
           acceleratedCodecs={DEFAULT_ACCELERATED_CODECS}
+          videoSync="display-resample"
           surfaceWidth={resolutions.fullHd.width}
           surfaceHeight={resolutions.fullHd.height}
           selectedAudioTrack={audioTrack}

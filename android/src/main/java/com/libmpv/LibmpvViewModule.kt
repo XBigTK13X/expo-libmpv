@@ -70,6 +70,11 @@ class LibmpvViewModule : Module() {
                 view.onSessionUpdatedFromProps()
             }
 
+            Prop("videoSync") { view: LibmpvView, value: String ->
+                view.session.videoSync = value
+                view.onSessionUpdatedFromProps()
+            }
+
             Prop("surfaceWidth") { view: LibmpvView, value: Int ->
                 view.session.surfaceWidth = value
             }

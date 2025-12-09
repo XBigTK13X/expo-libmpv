@@ -93,7 +93,7 @@ export const LibmpvView = React.forwardRef<LibmpvViewNativeMethods, LibmpvViewPr
     isPlaying={props.isPlaying}
     decodingMode={props.decodingMode}
     acceleratedCodecs={props.acceleratedCodecs}
-
+    videoSync={props.videoSync}
     surfaceWidth={props.surfaceWidth}
     surfaceHeight={props.surfaceHeight}
     selectedAudioTrack={props.selectedAudioTrack}

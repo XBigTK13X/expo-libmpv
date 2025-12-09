@@ -21,6 +21,7 @@ class LibmpvSession {
     var videoOutput: String? = null
     var decodingMode: String? = null
     var acceleratedCodecs: String? = null
+    var videoSync: String? = null
 
     var surfaceWidth: Int? = null
     var surfaceHeight: Int? = null

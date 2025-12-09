@@ -6,6 +6,7 @@ export type LibmpvViewProps = {
   isPlaying: boolean,
   decodingMode: string,
   acceleratedCodecs: string,
+  videoSync: string,
   selectedAudioTrack: number,
   selectedSubtitleTrack: number,
   seekToSeconds: number,
