@@ -76,7 +76,7 @@ export const LibmpvView = React.forwardRef<LibmpvViewNativeMethods, LibmpvViewPr
   }
 
   let seekProps: any = {}
-  if (typeof props?.seekToSeconds === 'number' && props?.seekToSeconds > 0) {
+  if (typeof props?.seekToSeconds === 'number' && props?.seekToSeconds >= 0) {
     seekProps.seekToSeconds = props.seekToSeconds
   }
 

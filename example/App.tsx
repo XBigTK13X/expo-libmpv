@@ -91,8 +91,9 @@ function LandingPage({ setPage }) {
 function VideoPage({ setPage }) {
   const [isPlaying, setIsPlaying] = React.useState(true);
   const [loadError, setError] = React.useState('')
-  const [seekSeconds, setSeekSeconds] = React.useState(FIVE_MINUTES)
   const [subScale, setSubScale] = React.useState(1.0)
+
+  const seekSeconds = FIVE_MINUTES
 
   const nativeRef = React.useRef(null);
 
