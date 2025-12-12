@@ -173,7 +173,7 @@ function VideoPage({ setPage }) {
           videoOutput="gpu"
           isPlaying={isPlaying}
           playUrl={videoUrl}
-          decodingMode={'mediacodec'}
+          decodingMode={DEFAULT_DECODING_MODE}
           acceleratedCodecs={DEFAULT_ACCELERATED_CODECS}
           videoSync="display-resample"
           surfaceWidth={resolutions.fullHd.width}
