@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { findNodeHandle } from 'react-native'
 import { View, Pressable, Modal, TouchableOpacity, AppState, Text } from 'react-native';
 import LibmpvView, { DEFAULT_DECODING_MODE, DEFAULT_ACCELERATED_CODECS } from 'expo-libmpv';
 
@@ -19,11 +18,14 @@ const circularReplacer = () => {
 const DEBUG_EVENTS = true
 
 const TRACK_DISABLED = -1;
-const FIVE_MINUTES = 300;
+const SEEK_START_SECONDS = 400;
 
 const animeUrl = 'http://juggernaut.9914.us/tv/anime/collection/precure/Star ☆ Twinkle Precure/Season 1/S01E006 - An Imagination of Darkness! The Dark Pen Appears!.mkv'
 const cartoonSubbedUrl = 'http://juggernaut.9914.us/tv/cartoon/k/King of the Hill/Season 14/S14E003 - Chore Money, Chore Problems.mkv'
-const videoUrl = animeUrl;
+const srtSubbedAnime = "http://juggernaut.9914.us/tv/anime/m/My Hero Academia/Season 8/S08E008 - Izuku Midoriya - Rising.mkv"
+const srtSubbedLiveAction = "http://juggernaut.9914.us/tv/live-action/h/Heartland (2007) (CA)/Season 19/S19E009 - Revenge.mkv"
+
+const videoUrl = srtSubbedLiveAction;
 let audioTrack = 0
 let subtitleTrack = 0
 
@@ -81,9 +83,10 @@ function LandingPage({ setPage }) {
       <View style={styles.homeButton}>
         <Pressable style={styles.button} onPress={() => { setPage('video') }}>
           <Text style={styles.buttonText}>Play Video</Text>
+          <Text style={{ color: 'white' }}> File: {videoUrl}</Text>
         </Pressable>
       </View>
-    </View>
+    </View >
   )
 }
 
@@ -93,7 +96,7 @@ function VideoPage({ setPage }) {
   const [loadError, setError] = React.useState('')
   const [subScale, setSubScale] = React.useState(1.0)
 
-  const seekSeconds = FIVE_MINUTES
+  const seekSeconds = SEEK_START_SECONDS
 
   const nativeRef = React.useRef(null);
 
@@ -170,7 +173,7 @@ function VideoPage({ setPage }) {
           videoOutput="gpu"
           isPlaying={isPlaying}
           playUrl={videoUrl}
-          decodingMode={DEFAULT_DECODING_MODE}
+          decodingMode={'mediacodec'}
           acceleratedCodecs={DEFAULT_ACCELERATED_CODECS}
           videoSync="display-resample"
           surfaceWidth={resolutions.fullHd.width}

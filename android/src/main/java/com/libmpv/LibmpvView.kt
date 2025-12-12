@@ -48,23 +48,24 @@ class LibmpvView(
         return attached && surfaceReady
     }
 
-    private fun reconcileRenderer() {
-        if (shouldHaveRenderer() && renderer == null) {
-            renderer = LibmpvRenderer(
-                session = session,
-                surfaceView = surfaceView,
-                onLog = { payload -> onLibmpvLog(payload) },
-                onEvent = { payload -> onLibmpvEvent(payload) }
-            )
-            renderer!!.start()
-            return
-        }
+private fun reconcileRenderer() {
+    if (renderer == null && attached) {
+        renderer = LibmpvRenderer(
+            session = session,
+            surfaceView = surfaceView,
+            onLog = { payload -> onLibmpvLog(payload) },
+            onEvent = { payload -> onLibmpvEvent(payload) }
+        )
+        renderer!!.start()
+    }
 
-        if (!shouldHaveRenderer() && renderer != null) {
-            renderer!!.destroy()
-            renderer = null
+    renderer?.let { r ->
+        if (surfaceReady) {
+            r.attachSurfaceIfNeeded()
         }
     }
+}
+
 
     fun onSessionUpdatedFromProps() {
         reconcileRenderer()
@@ -85,11 +86,13 @@ class LibmpvView(
 
     override fun surfaceCreated(holder: SurfaceHolder) {
         surfaceReady = true
-        reconcileRenderer()
+        renderer?.surfaceReady = true
+        renderer?.attachSurfaceIfNeeded()
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
         surfaceReady = false
+        renderer?.surfaceReady = false
         reconcileRenderer()
     }
 
