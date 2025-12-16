@@ -34,10 +34,11 @@ class LibmpvRenderer(
     private val stateLock = Any()
 
     @Volatile private var state: State = State.NEW
-    @Volatile private var destroyed = false
-    @Volatile private var loadedUrl: String? = null
     @Volatile private var surfaceAttached = false
     @Volatile var surfaceReady = false
+    @Volatile private var loadedUrl: String? = null
+    @Volatile private var playbackStarted = false
+    @Volatile private var destroyed = false
 
     private var mpvDirectory: String? = null
 
@@ -295,6 +296,17 @@ class LibmpvRenderer(
 
         try {
             loadedUrl = url
+
+            playbackStarted = false
+
+            val initialSeek = session.seekToSeconds
+            if (initialSeek != null && session.needsApply(LibmpvSession.MpvIntent.SEEK)) {
+                MPVLib.setOptionString("start", initialSeek.toString())
+                session.markApplied(LibmpvSession.MpvIntent.SEEK)
+            } else {
+                MPVLib.setOptionString("start", "0")
+            }
+
             MPVLib.command(
                 arrayOf(
                     "loadfile",
@@ -391,8 +403,12 @@ class LibmpvRenderer(
 
     override fun event(eventId: Int) {
         when (eventId) {
-            MPVLib.MpvEvent.MPV_EVENT_FILE_LOADED,
+            MPVLib.MpvEvent.MPV_EVENT_FILE_LOADED -> {
+                session.hasFileLoaded = true
+                applyDeferredState()
+            }
             MPVLib.MpvEvent.MPV_EVENT_PLAYBACK_RESTART -> {
+                playbackStarted = true
                 session.hasFileLoaded = true
                 applyDeferredState()
             }
@@ -412,6 +428,9 @@ class LibmpvRenderer(
     }
 
     override fun eventProperty(property: String, value: Boolean) {
+        if (property == "eof-reached" && !playbackStarted) {
+            return
+        }
         onEvent(mapOf("property" to property, "kind" to "boolean", "value" to value))
     }
 

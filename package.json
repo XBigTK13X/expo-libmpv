@@ -1,6 +1,6 @@
 {
   "name": "expo-libmpv",
-  "version": "0.5.9",
+  "version": "0.5.11",
   "description": "A libmpv Fabric component for Android",
   "main": "build/index.js",
   "types": "build/index.d.ts",
