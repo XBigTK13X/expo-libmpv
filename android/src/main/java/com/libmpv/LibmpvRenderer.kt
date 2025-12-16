@@ -357,6 +357,9 @@ class LibmpvRenderer(
         if (session.needsApply(LibmpvSession.MpvIntent.SEEK)) {
             val target = session.seekToSeconds
             if (target != null) {
+                if (!session.hasFileLoaded) {
+                    return
+                }
                 MPVLib.command(
                     arrayOf(
                         "seek",
@@ -367,6 +370,7 @@ class LibmpvRenderer(
                 session.markApplied(LibmpvSession.MpvIntent.SEEK)
             }
         }
+
     }
 
     private fun stopPlayback() {
@@ -395,10 +399,7 @@ class LibmpvRenderer(
 
     override fun event(eventId: Int) {
         when (eventId) {
-            MPVLib.MpvEvent.MPV_EVENT_FILE_LOADED -> {
-                session.hasFileLoaded = true
-            }
-
+            MPVLib.MpvEvent.MPV_EVENT_FILE_LOADED,
             MPVLib.MpvEvent.MPV_EVENT_PLAYBACK_RESTART -> {
                 session.hasFileLoaded = true
                 applyDeferredState()
