@@ -48,31 +48,32 @@ export const LibmpvView = React.forwardRef<LibmpvViewNativeMethods, LibmpvViewPr
   }, []);
 
   // Pass mpv events and logs back up to the parent
-  const onLogEvent = (libmpvEvent: any) => {
-    if (props.onLibmpvEvent) {
-      if (libmpvEvent && libmpvEvent.nativeEvent) {
-        libmpvEvent = libmpvEvent.nativeEvent
-      }
-      if (libmpvEvent.eventId) {
-        libmpvEvent.value = parseInt(libmpvEvent.eventId, 10)
-        libmpvEvent.eventKind = EVENT_LOOKUP[libmpvEvent.eventId]
-      }
-      else if (libmpvEvent.kind === 'long' || libmpvEvent.kind === 'double') {
-        libmpvEvent.value = Number(libmpvEvent.value)
-      }
-      else if (libmpvEvent.kind === 'boolean') {
-        libmpvEvent.value = libmpvEvent.value === 'true'
-      }
-      return props.onLibmpvEvent(libmpvEvent)
+  const onLogEvent = (e: any) => {
+    if (!props.onLibmpvEvent) {
+      return
     }
-  }
-  const onLibmpvLog = (libmpvLog: any) => {
-    if (props.onLibmpvLog) {
-      if (libmpvLog && libmpvLog.nativeEvent) {
-        libmpvLog = libmpvLog.nativeEvent
-      }
-      return props.onLibmpvLog(libmpvLog);
+
+    const src = e?.nativeEvent ?? e;
+    const libmpvEvent = { ...src };
+
+    if (libmpvEvent.eventId) {
+      libmpvEvent.value = parseInt(libmpvEvent.eventId, 10);
+      libmpvEvent.eventKind = EVENT_LOOKUP[libmpvEvent.eventId];
+    } else if (libmpvEvent.kind === 'long' || libmpvEvent.kind === 'double') {
+      libmpvEvent.value = Number(libmpvEvent.value);
+    } else if (libmpvEvent.kind === 'boolean') {
+      libmpvEvent.value = libmpvEvent.value === 'true';
     }
+
+    return props.onLibmpvEvent(libmpvEvent);
+  };
+
+  const onLibmpvLog = (e: any) => {
+    if (!props.onLibmpvLog) {
+      return
+    }
+    const src = e?.nativeEvent ?? e
+    return props.onLibmpvLog({ ...src });
   }
 
   // The order props are handled in the native code is non-deterministic
