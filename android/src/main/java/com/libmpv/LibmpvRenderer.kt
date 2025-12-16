@@ -299,7 +299,6 @@ class LibmpvRenderer(
         try {
             loadedUrl = url
             MPVLib.command(arrayOf("loadfile", url, "replace"))
-            applyContinuousState()
         } catch (e: Exception) {
             logException(e)
         }
@@ -319,21 +318,23 @@ class LibmpvRenderer(
     }
 
     private fun applyDeferredState() {
-        if (!mpvAlive || shuttingDown) {
+        if (!session.hasFileLoaded || !surfaceAttached || state != State.ACTIVE) {
             return
         }
 
         session.seekToSeconds?.let { target ->
             if (session.needsApply(LibmpvSession.MpvIntent.SEEK)) {
-                val timePos = MPVLib.getPropertyDouble("time-pos")
                 val seekable = MPVLib.getPropertyBoolean("seekable") == true
 
-                if (seekable && timePos != null && kotlin.math.abs(timePos - target) > 0.5) {
+                if (seekable && surfaceAttached && state == State.ACTIVE) {
+                    MPVLib.command(arrayOf("set", "pause", "yes"))
                     MPVLib.command(arrayOf("seek", target.toString(), "absolute"))
+                    MPVLib.command(arrayOf("set", "pause", if (session.isPlaying) "no" else "yes"))
                     session.markApplied(LibmpvSession.MpvIntent.SEEK)
                 }
             }
         }
+
 
         session.selectedAudioTrack?.let {
             if (session.needsApply(LibmpvSession.MpvIntent.AUDIO_TRACK)) {
@@ -382,7 +383,10 @@ class LibmpvRenderer(
 
     override fun event(eventId: Int) {
         when (eventId) {
-            MPVLib.MpvEvent.MPV_EVENT_FILE_LOADED,
+            MPVLib.MpvEvent.MPV_EVENT_FILE_LOADED -> {
+                session.hasFileLoaded = true
+            }
+
             MPVLib.MpvEvent.MPV_EVENT_PLAYBACK_RESTART -> {
                 session.hasFileLoaded = true
                 applyDeferredState()
