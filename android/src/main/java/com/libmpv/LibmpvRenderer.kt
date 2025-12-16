@@ -284,10 +284,7 @@ class LibmpvRenderer(
     }
 
     private fun maybeStartPlayback() {
-        if (state != State.ACTIVE) {
-            return
-        }
-        if (!surfaceAttached) {
+        if (state != State.ACTIVE || !surfaceAttached) {
             return
         }
 
@@ -298,11 +295,26 @@ class LibmpvRenderer(
 
         try {
             loadedUrl = url
-            MPVLib.command(arrayOf("loadfile", url, "replace"))
+            MPVLib.setOptionString("start", "0")
+
+            val start = session.seekToSeconds
+            if (start != null) {
+                MPVLib.setOptionString("start", start.toLong().toString())
+            }
+
+            MPVLib.command(
+                arrayOf(
+                    "loadfile",
+                    url,
+                    "replace"
+                )
+            )
+
         } catch (e: Exception) {
             logException(e)
         }
     }
+
 
     private fun applyContinuousState() {
         if (!mpvAlive || shuttingDown) {
@@ -322,20 +334,6 @@ class LibmpvRenderer(
             return
         }
 
-        session.seekToSeconds?.let { target ->
-            if (session.needsApply(LibmpvSession.MpvIntent.SEEK)) {
-                val seekable = MPVLib.getPropertyBoolean("seekable") == true
-
-                if (seekable && surfaceAttached && state == State.ACTIVE) {
-                    MPVLib.command(arrayOf("set", "pause", "yes"))
-                    MPVLib.command(arrayOf("seek", target.toString(), "absolute"))
-                    MPVLib.command(arrayOf("set", "pause", if (session.isPlaying) "no" else "yes"))
-                    session.markApplied(LibmpvSession.MpvIntent.SEEK)
-                }
-            }
-        }
-
-
         session.selectedAudioTrack?.let {
             if (session.needsApply(LibmpvSession.MpvIntent.AUDIO_TRACK)) {
                 val aid = if (it == -1) "no" else (it + 1).toString()
@@ -353,6 +351,20 @@ class LibmpvRenderer(
                 val sid = if (trackIndex == -1) "no" else (trackIndex + 1).toString()
                 MPVLib.command(arrayOf("set", "sid", sid))
                 session.markApplied(LibmpvSession.MpvIntent.SUBTITLE_TRACK)
+            }
+        }
+
+        if (session.needsApply(LibmpvSession.MpvIntent.SEEK)) {
+            val target = session.seekToSeconds
+            if (target != null) {
+                MPVLib.command(
+                    arrayOf(
+                        "seek",
+                        target.toString(),
+                        "absolute"
+                    )
+                )
+                session.markApplied(LibmpvSession.MpvIntent.SEEK)
             }
         }
     }
