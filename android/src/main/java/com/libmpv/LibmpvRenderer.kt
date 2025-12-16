@@ -295,13 +295,6 @@ class LibmpvRenderer(
 
         try {
             loadedUrl = url
-            MPVLib.setOptionString("start", "0")
-
-            val start = session.seekToSeconds
-            if (start != null) {
-                MPVLib.setOptionString("start", start.toLong().toString())
-            }
-
             MPVLib.command(
                 arrayOf(
                     "loadfile",
@@ -354,16 +347,15 @@ class LibmpvRenderer(
             }
         }
 
-        if (session.needsApply(LibmpvSession.MpvIntent.SEEK)) {
-            val target = session.seekToSeconds
-            if (target != null) {
-                if (!session.hasFileLoaded) {
-                    return
-                }
+        session.seekToSeconds?.let { seekToSeconds ->
+            if (
+                session.needsApply(LibmpvSession.MpvIntent.SEEK) &&
+                session.hasFileLoaded
+            ) {
                 MPVLib.command(
                     arrayOf(
                         "seek",
-                        target.toString(),
+                        seekToSeconds.toString(),
                         "absolute"
                     )
                 )
