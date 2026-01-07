@@ -8,6 +8,10 @@ import com.libmpv.LibmpvSession
 import dev.jdtech.mpv.MPVLib
 import java.io.File
 import java.io.FileOutputStream
+import org.json.JSONArray
+import org.json.JSONObject
+import java.util.ArrayList
+import java.util.HashMap
 
 class LibmpvRenderer(
     private val session: LibmpvSession,
@@ -392,13 +396,14 @@ class LibmpvRenderer(
     }
 
     override fun logMessage(prefix: String, level: Int, text: String) {
-        if (shuttingDown) {
-            return
-        }
+        if (shuttingDown) return
+
+        val safeText = if (text.length > 1000) text.substring(0, 1000) + "..." else text
+
         if (level <= LOG_LEVEL_WARN) {
-            Log.w(TAG, "[$prefix] $text")
+            Log.w(TAG, "[$prefix] $safeText")
         }
-        onLog(mapOf("prefix" to prefix, "level" to level, "text" to text))
+        onLog(mapOf("prefix" to prefix, "level" to level, "text" to safeText))
     }
 
     override fun event(eventId: Int) {
@@ -435,7 +440,42 @@ class LibmpvRenderer(
     }
 
     override fun eventProperty(property: String, value: String) {
-        onEvent(mapOf("property" to property, "kind" to "string", "value" to value))
+        if (property == "track-list") {
+            try {
+                val jsonArray = JSONArray(value)
+                val tracks = ArrayList<Map<String, Any>>()
+
+                for (i in 0 until jsonArray.length()) {
+                    val item = jsonArray.getJSONObject(i)
+                    val map = HashMap<String, Any>()
+                    val keys = item.keys()
+
+                    while (keys.hasNext()) {
+                        val key = keys.next()
+                        map[key] = item.opt(key).toString()
+                    }
+                    tracks.add(map)
+                }
+
+                onEvent(mapOf(
+                    "property" to property,
+                    "kind" to "track-list",
+                    "value" to tracks
+                ))
+                return
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to parse track-list JSON", e)
+            }
+        }
+
+        val safeValue = if (value.length > 1000) {
+            Log.w(TAG, "Truncating massive property: $property")
+            value.substring(0, 1000) + "..."
+        } else {
+            value
+        }
+
+        onEvent(mapOf("property" to property, "kind" to "string", "value" to safeValue))
     }
 
     private fun createMpvDirectory() {

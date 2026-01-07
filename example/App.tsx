@@ -123,7 +123,7 @@ function VideoPage({ setPage }) {
 
   function onLibmpvEvent(libmpvEvent) {
     if (DEBUG_EVENTS) {
-      if (!libmpvEvent.property && libmpvEvent.property !== 'track-list' && libmpvEvent?.property !== 'demuxer-cache-time') {
+      if (libmpvEvent?.property !== 'demuxer-cache-time') {
         console.log(JSON.stringify({ libmpvEvent }, circularReplacer(), 4))
       }
     }

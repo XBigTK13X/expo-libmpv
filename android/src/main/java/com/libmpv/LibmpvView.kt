@@ -48,23 +48,23 @@ class LibmpvView(
         return attached && surfaceReady
     }
 
-private fun reconcileRenderer() {
-    if (renderer == null && attached) {
-        renderer = LibmpvRenderer(
-            session = session,
-            surfaceView = surfaceView,
-            onLog = { payload -> onLibmpvLog(payload) },
-            onEvent = { payload -> onLibmpvEvent(payload) }
-        )
-        renderer!!.start()
-    }
+    private fun reconcileRenderer() {
+        if (renderer == null && attached) {
+            renderer = LibmpvRenderer(
+                session = session,
+                surfaceView = surfaceView,
+                onLog = { payload -> onLibmpvLog(payload) },
+                onEvent = { payload -> onLibmpvEvent(payload) }
+            )
+            renderer!!.start()
+        }
 
-    renderer?.let { r ->
-        if (surfaceReady) {
-            r.attachSurfaceIfNeeded()
+        renderer?.let { r ->
+            if (surfaceReady) {
+                r.attachSurfaceIfNeeded()
+            }
         }
     }
-}
 
 
     fun onSessionUpdatedFromProps() {
