@@ -256,22 +256,23 @@ class LibmpvRenderer(
             if (!videoSync.isNullOrBlank()) {
                 if (videoSync == "display-resample") {
                     MPVLib.setOptionString("video-sync", "display-resample")
-                    MPVLib.setOptionString("audio-pitch-correction", "no")
-                    MPVLib.setOptionString("autosync", "1")
-                    MPVLib.setOptionString("correct-pts", "no")
+                    MPVLib.setOptionString("interpolation", "yes")
+                    MPVLib.setOptionString("tscale", "oversample")
+                    MPVLib.setOptionString("audio-pitch-correction", "yes")
                 }
                 if (videoSync == "audio") {
                     MPVLib.setOptionString("video-sync", "audio")
-                    MPVLib.setOptionString("audio-pitch-correction", "yes")
-                    MPVLib.setOptionString("autosync", "0")
-                    MPVLib.setOptionString("correct-pts", "yes")
+                    MPVLib.setOptionString("interpolation", "no")
+                    MPVLib.setOptionString("tscale", "off")
                 }
+            } else {
+                MPVLib.setOptionString("video-sync", "audio")
+                MPVLib.setOptionString("interpolation", "no")
+                MPVLib.setOptionString("tscale", "off")
             }
 
             MPVLib.setOptionString("scale", "bilinear")
             MPVLib.setOptionString("dscale", "bilinear")
-            MPVLib.setOptionString("tscale", "off")
-            MPVLib.setOptionString("interpolation", "no")
 
             MPVLib.setOptionString("alang", "")
             MPVLib.setOptionString("ao", "audiotrack")
