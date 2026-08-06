@@ -9,17 +9,17 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "expo": "54.0.0-preview.16",
+    "expo": "57.0.11",
     "expo-libmpv": "../",
-    "expo-build-properties": "1.0.7",
-    "expo-screen-orientation": "^8.1.7",
-    "react": "19.1.0",
-    "react-native": "0.81.1"
+    "expo-build-properties": "57.0.9",
+    "expo-screen-orientation": "57.0.1",
+    "react": "19.2.8",
+    "react-native": "npm:react-native-tvos@0.86.2-0"
   },
   "devDependencies": {
-    "@babel/core": "^7.25.2",
-    "@types/react": "~19.1.0",
-    "typescript": "~5.8.3"
+    "@babel/core": "^7.29.0",
+    "@types/react": "~19.2.18",
+    "typescript": "~6.0.3"
   },
   "private": true,
   "expo": {
