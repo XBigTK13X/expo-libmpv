@@ -113,8 +113,15 @@ function VideoPage({ setPage }) {
     };
   }, []);
 
+
   React.useEffect(() => {
-    nativeRef.current.runCommand(`set|sub-scale|${subScale}`)
+    if (!nativeRef.current) return
+
+    const animationFrame = requestAnimationFrame(() => {
+      nativeRef.current?.runCommand(`set|sub-scale|${subScale}`)
+    })
+
+    return () => cancelAnimationFrame(animationFrame)
   }, [subScale])
 
   if (loadError) {
@@ -160,19 +167,18 @@ function VideoPage({ setPage }) {
     []
   );
   return (
-    <Modal style={styles.container} onRequestClose={() => {
-      setPage('home')
-    }}>
+    <View style={styles.container}>
       <TouchableOpacity
-        transparent
-        style={styles.video}
-        onPress={onPress} >
+        activeOpacity={1}
+        style={{ flex: 1, width: '100%', height: '100%' }}
+        onPress={onPress}
+      >
         <LibmpvView
           ref={nativeRef}
-          key={viewKey}
+          style={{ flex: 1, width: '100%', height: '100%' }}
           videoOutput="gpu"
           isPlaying={isPlaying}
-          playUrl={videoUrl}
+          playUrl={encodeURI(videoUrl)}
           decodingMode={DEFAULT_DECODING_MODE}
           acceleratedCodecs={DEFAULT_ACCELERATED_CODECS}
           videoSync="display-resample"
@@ -185,7 +191,7 @@ function VideoPage({ setPage }) {
           onLibmpvLog={onLibmpvLog}
         />
       </TouchableOpacity>
-    </Modal>
+    </View>
   )
 }
 

@@ -147,14 +147,27 @@ class LibmpvRenderer(
         surfaceAttached = true
 
         synchronized(stateLock) {
+            applyConfiguration()
             MPVLib.init()
             state = State.INITIALIZED
         }
 
         addObservers()
-        applyConfiguration()
-        state = State.ACTIVE
+
+        synchronized(stateLock) {
+            state = State.ACTIVE
+        }
+
         maybeStartPlayback()
+    }
+
+    fun onSessionUpdated() {
+        if (!mpvAlive || shuttingDown) {
+            return
+        }
+        maybeStartPlayback()
+        applyDeferredState()
+        applyContinuousState()
     }
 
     private fun detachSurfaceForDestroy() {
@@ -170,13 +183,6 @@ class LibmpvRenderer(
         }
     }
 
-    fun onSessionUpdated() {
-        if (!mpvAlive || shuttingDown) {
-            return
-        }
-        applyDeferredState()
-        applyContinuousState()
-    }
 
     private fun initMpv() {
         synchronized(stateLock) {
@@ -492,7 +498,7 @@ class LibmpvRenderer(
             logMessage(
                 "LimpbvRenderer->createMpvDirectory",
                 LOG_LEVEL_INFO,
-                "expo-libmpv version 0.5.4-0"
+                "expo-libmpv version 0.6.1-1"
             )
             logMessage(
                 "LimpbvRenderer->createMpvDirectory",

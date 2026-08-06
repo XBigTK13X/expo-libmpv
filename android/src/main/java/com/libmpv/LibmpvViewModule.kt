@@ -16,11 +16,15 @@ class LibmpvViewModule : Module() {
             )
 
             AsyncFunction("runCommand") { view: LibmpvView, orders: String ->
-                view.runCommand(orders)
+                if (view.isAttachedToWindow) {
+                    view.runCommand(orders)
+                }
             }
 
             AsyncFunction("setOptionString") { view: LibmpvView, options: String ->
-                view.setOptionString(options)
+                if (view.isAttachedToWindow) {
+                    view.setOptionString(options)
+                }
             }
 
             AsyncFunction("cleanup") { view: LibmpvView ->
@@ -82,7 +86,6 @@ class LibmpvViewModule : Module() {
             Prop("surfaceHeight") { view: LibmpvView, value: Int ->
                 view.session.surfaceHeight = value
             }
-
 
             OnViewDestroys { view: LibmpvView ->
                 view.cleanup()

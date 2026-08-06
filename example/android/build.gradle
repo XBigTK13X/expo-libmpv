@@ -10,13 +10,6 @@ buildscript {
     classpath('com.facebook.react:react-native-gradle-plugin')
     classpath('org.jetbrains.kotlin:kotlin-gradle-plugin')
   }
-  ext {
-    ndkVersion = "29.0.14206865"
-    buildToolsVersion = "36.1.0"
-    targetSdkVersion = 36
-    compileSdkVersion = 36
-    minSdkVersion = 26
-  }
 }
 
 allprojects {
@@ -24,7 +17,6 @@ allprojects {
     google()
     mavenCentral()
     maven { url 'https://www.jitpack.io' }
-    maven { url '/home/kretst/maven-repo' }
   }
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "expo-libmpv",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "A libmpv Fabric component for Android",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -33,7 +33,7 @@
   "devDependencies": {
     "@types/react": "~19.2.18",
     "expo": "57.0.11",
-    "expo-module-scripts": "^4.1.10",
+    "expo-module-scripts": "^56.0.3",
     "react": "19.2.8",
     "react-native": "npm:react-native-tvos@0.86.2-0"
   },

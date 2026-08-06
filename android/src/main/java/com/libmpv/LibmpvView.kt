@@ -28,9 +28,9 @@ class LibmpvView(
         surfaceView.holder.addCallback(this)
         addView(
             surfaceView,
-            FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
+            LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT
             )
         )
         appContext.activityProvider?.currentActivity?.let { activity ->
@@ -44,8 +44,26 @@ class LibmpvView(
         }
     }
 
-    private fun shouldHaveRenderer(): Boolean {
-        return attached && surfaceReady
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        val width = MeasureSpec.getSize(widthMeasureSpec)
+        val height = MeasureSpec.getSize(heightMeasureSpec)
+
+        // Measure child surface explicitly for Expo 57 / Fabric layout passes
+        surfaceView.measure(
+            MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+            MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
+        )
+        setMeasuredDimension(width, height)
+    }
+
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        val width = right - left
+        val height = bottom - top
+        if (width > 0 && height > 0) {
+            surfaceView.layout(0, 0, width, height)
+        }
     }
 
     private fun reconcileRenderer() {
@@ -66,7 +84,6 @@ class LibmpvView(
         }
     }
 
-
     fun onSessionUpdatedFromProps() {
         reconcileRenderer()
         renderer?.onSessionUpdated()
@@ -86,8 +103,12 @@ class LibmpvView(
 
     override fun surfaceCreated(holder: SurfaceHolder) {
         surfaceReady = true
-        renderer?.surfaceReady = true
-        renderer?.attachSurfaceIfNeeded()
+        if (renderer == null) {
+            reconcileRenderer()
+        } else {
+            renderer?.surfaceReady = true
+            renderer?.attachSurfaceIfNeeded()
+        }
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
