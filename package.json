@@ -35,7 +35,9 @@
     "expo": "57.0.11",
     "expo-module-scripts": "^56.0.3",
     "react": "19.2.8",
-    "react-native": "npm:react-native-tvos@0.86.2-0"
+    "react-native": "npm:react-native-tvos@0.86.2-0",
+    "@babel/core": "^7.29.0",
+    "typescript": "~6.0.3"
   },
   "peerDependencies": {
     "expo": "*",

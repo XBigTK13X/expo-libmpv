@@ -1,6 +1,6 @@
 import { requireNativeView } from 'expo';
 import * as React from 'react';
-import { LibmpvViewProps, LibmpvViewNativeMethods } from './LibmpvViewTypes';
+import { type LibmpvViewProps, type LibmpvViewNativeMethods } from './LibmpvViewTypes';
 
 const styles: any = {
   videoPlayer: {
