@@ -19,7 +19,7 @@ config.resolver.nodeModulesPaths = [
 ];
 
 config.resolver.extraNodeModules = {
-  'expo-libmpv': '..',
+  '@snowsuite/expo-libmpv': '..',
 };
 
 config.watchFolders = [path.resolve(__dirname, '..')];

@@ -3,8 +3,12 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "expo-libmpv": ["../src/index"],
-      "expo-libmpv/*": ["../src/*"]
+      "@snowsuite/expo-libmpv": [
+        "../src/index"
+      ],
+      "snowsuite/expo-libmpv/*": [
+        "../src/*"
+      ]
     }
   }
 }

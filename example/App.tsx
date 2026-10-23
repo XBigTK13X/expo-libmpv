@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { View, Pressable, Modal, TouchableOpacity, AppState, Text } from 'react-native';
-import LibmpvView, { DEFAULT_DECODING_MODE, DEFAULT_ACCELERATED_CODECS } from 'expo-libmpv';
+import LibmpvView, { DEFAULT_DECODING_MODE, DEFAULT_ACCELERATED_CODECS } from '@snowsuite/expo-libmpv';
 
 const circularReplacer = () => {
   const seen = new WeakSet();
